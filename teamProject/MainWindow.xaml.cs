@@ -168,11 +168,27 @@ namespace teamProject
     [AddINotifyPropertyChangedInterface]
     public class DFile : DItem
     {
+        private List<string> Units = new List<string>()
+        {
+            "B", "KB", "MB", "GB"
+        };
+
         public long Size { get; set; }
+        public string SizeString { get; set; }
         
         public DFile(string name, DateTime date, long size) : base(name, date)
         {
-            Size = size / 1024 / 1024;
+            int unitIndex = 0;
+
+            Size = size;
+            
+            while (Size >= 1024)
+            {
+                Size = Size / 1024;
+                unitIndex++;
+            }
+            
+            SizeString = $"{Size} {Units[unitIndex]}";
         }
     }
 }
