@@ -23,11 +23,11 @@
             <Button Name="BackBtn" Click="BackBtn_Click" Content="←" FontSize="30" VerticalContentAlignment="Top"/>
             <Button Name="NextBtn" Click="NextBtn_Click" Content="→" FontSize="30" VerticalContentAlignment="Top"/>
 
-            <TextBox Name="SearchTextBox" Text="Пошук" VerticalContentAlignment="Center" DockPanel.Dock="Right" Width="220"/>
+            <TextBox Name="SearchTextBox" Text="Пошук" VerticalContentAlignment="Center" DockPanel.Dock="Right" Width="220" TextChanged="SearchTextBox_TextChanged"/>
             <TextBox Name="PathTextBox" Text="{Binding Path}" VerticalContentAlignment="Center" IsReadOnly="True"/>
         </DockPanel>
 
-        <ListBox Name="FolderListBox" Grid.Row="1" d:ItemsSource="{d:SampleData ItemCount=5}">
+        <ListBox Name="FolderListBox"   Grid.Row="1" d:ItemsSource="{d:SampleData ItemCount=5}">
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <Grid>
@@ -45,7 +45,7 @@
             </ListBox.ItemTemplate>
         </ListBox>
 
-        <ListBox Name="ItemsListBox" Grid.Column="1" Grid.Row="1" ItemsSource="{Binding Items}" d:ItemsSource="{d:SampleData ItemCount=5}" >
+        <ListBox Name="ItemsListBox" Grid.Column="1" ItemsSource="{Binding Items}" Grid.Row="1"  d:ItemsSource="{d:SampleData ItemCount=5}" >
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <Grid Name="ItemGrid" MouseDown="ItemGrid_MouseDown">
