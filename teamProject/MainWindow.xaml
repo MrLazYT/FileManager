@@ -1,0 +1,78 @@
+﻿<Window x:Class="teamProject.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:teamProject"
+        d:DataContext="{d:DesignInstance local:Model, IsDesignTimeCreatable=True}"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="150"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="20"/>
+        </Grid.RowDefinitions>
+
+        <DockPanel Grid.ColumnSpan="2">
+            <Button Name="BackBtn" Click="BackBtn_Click" Content="←" FontSize="30" VerticalContentAlignment="Top"/>
+            <Button Name="NextBtn" Click="NextBtn_Click" Content="→" FontSize="30" VerticalContentAlignment="Top"/>
+
+            <TextBox Name="SearchTextBox" Text="Пошук" VerticalContentAlignment="Center" DockPanel.Dock="Right" Width="220"/>
+            <TextBox Name="PathTextBox" Text="{Binding Path}" VerticalContentAlignment="Center" IsReadOnly="True"/>
+        </DockPanel>
+
+        <ListBox Name="FolderListBox" Grid.Row="1" d:ItemsSource="{d:SampleData ItemCount=5}">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="30"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Image Grid.Column="0" Width="30" Height="30">
+                        </Image>
+
+                        <TextBlock Grid.Column="1" Name="FolderName"/>
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+        <ListBox Name="ItemsListBox" Grid.Column="1" Grid.Row="1" ItemsSource="{Binding Items}" d:ItemsSource="{d:SampleData ItemCount=5}" >
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid Name="ItemGrid" MouseDown="ItemGrid_MouseDown">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="30"/>
+                            <ColumnDefinition Width="360"/>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="80"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Image Grid.Column="0" Width="30" Height="30">
+                        </Image>
+
+                        <TextBlock Grid.Column="1" Name="ObjectName" Text="{Binding Name}"/>
+                        <TextBlock Grid.Column="2" Name="ObjectDate" Text="{Binding Date}"/>
+                        <TextBlock Grid.Column="3" Name="ObjectSize" Text="{Binding Size}">MB</TextBlock>
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+        <DockPanel Grid.Row="2" Grid.ColumnSpan="2">
+            <TextBlock Text="Всього елементів:"/>
+            <TextBlock Name="FileCountTextBlock" Text="{Binding FileCount}"/>
+            <TextBlock Text="|"/>
+            <TextBlock Text="Загальний розмір:"/>
+            <TextBlock Name="TotalSizeTextBlock" Text="{Binding TotalSize}"/>
+        </DockPanel>
+    </Grid>
+</Window>
