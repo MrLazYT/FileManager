@@ -14,14 +14,15 @@
         </Grid.ColumnDefinitions>
 
         <Grid.RowDefinitions>
-            <RowDefinition Height="50"/>
+            <RowDefinition Height="30"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="20"/>
         </Grid.RowDefinitions>
 
         <DockPanel Grid.ColumnSpan="2">
-            <Button Name="BackBtn" Click="BackBtn_Click" Content="←" FontSize="30" VerticalContentAlignment="Top"/>
-            <Button Name="NextBtn" Click="NextBtn_Click" Content="→" FontSize="30" VerticalContentAlignment="Top"/>
+            <Button Name="BackBtn" Click="BackBtn_Click" Content="←" FontSize="23" VerticalContentAlignment="Top" HorizontalContentAlignment="Center"/>
+            <Button Name="NextBtn" Click="NextBtn_Click" Content="→" FontSize="23" VerticalContentAlignment="Top"/>
+            <Button Name="SortBtn" Click="SortBtn_Click" Content="※" FontSize="23" VerticalContentAlignment="Top"/>
 
             <TextBox Name="SearchTextBox" Text="Пошук" VerticalContentAlignment="Center" DockPanel.Dock="Right" Width="220"/>
             <TextBox Name="PathTextBox" Text="{Binding Path}" VerticalContentAlignment="Center" IsReadOnly="True"/>
@@ -45,7 +46,7 @@
             </ListBox.ItemTemplate>
         </ListBox>
 
-        <ListBox Name="ItemsListBox" Grid.Column="1" Grid.Row="1" ItemsSource="{Binding Items}" d:ItemsSource="{d:SampleData ItemCount=5}" >
+        <ListBox Name="ItemsListBox" Grid.Column="1" Grid.Row="1" ItemsSource="{Binding Items}" d:ItemsSource="{d:SampleData ItemCount=5}">
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <Grid Name="ItemGrid" MouseDown="ItemGrid_MouseDown">
@@ -68,10 +69,10 @@
         </ListBox>
 
         <DockPanel Grid.Row="2" Grid.ColumnSpan="2">
-            <TextBlock Text="Всього елементів:"/>
+            <TextBlock Text="Всього елементів:" Width="105" Padding="5, 0, 0, 0"/>
             <TextBlock Name="FileCountTextBlock" Text="{Binding FileCount}"/>
-            <TextBlock Text="|"/>
-            <TextBlock Text="Загальний розмір:"/>
+            <TextBlock Text="|" Width="7" TextAlignment="Center"/>
+            <TextBlock Text="Загальний розмір:" Width="103"/>
             <TextBlock Name="TotalSizeTextBlock" Text="{Binding TotalSize}"/>
         </DockPanel>
     </Grid>
