@@ -92,7 +92,7 @@ namespace teamProject
                 model.AddItem(dItem);
             }
         }
-
+        //
         private void OpenFile(DItem dObject)
         {
             string filePath = Path.Combine(model.Path, dObject.Name);
