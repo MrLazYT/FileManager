@@ -27,7 +27,7 @@
             <TextBox Name="PathTextBox" Text="{Binding Path}" VerticalContentAlignment="Center" IsReadOnly="True"/>
         </DockPanel>
 
-        <ListBox Name="FolderListBox" Grid.Row="1" d:ItemsSource="{d:SampleData ItemCount=5}">
+        <ListBox Name="FolderListBox" Grid.Row="1" d:ItemsSource="{d:SampleData ItemCount=5}" >
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <Grid>
@@ -46,6 +46,17 @@
         </ListBox>
 
         <ListBox Name="ItemsListBox" Grid.Column="1" Grid.Row="1" ItemsSource="{Binding Items}" d:ItemsSource="{d:SampleData ItemCount=5}" >
+            <ListBox.ContextMenu>
+                <ContextMenu>
+                    <MenuItem x:Name="createItem" Header="Створити файл" Click="CreateFile_Click"/>
+                    <MenuItem x:Name="copyItem" Header="Копіювати" Click="Copy_Click"/>
+                    <MenuItem x:Name="pasteItem" Header="Вставити" Click="Paste_Click" IsEnabled="False"/>
+                    <MenuItem x:Name="updateItem" Header="Оновити" Click="Update_Click"/>
+                    <MenuItem x:Name="deleteItem"  Header="Видалити" Click="Delete_Click"/>
+                    <MenuItem x:Name="renameItem" Header="Перейменувати" Click="Rename_Click"/>
+                    <MenuItem x:Name="movItem" Header="Перемістити" Click="Mov_Click"/>
+                </ContextMenu>
+            </ListBox.ContextMenu>
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <Grid Name="ItemGrid" MouseDown="ItemGrid_MouseDown">
