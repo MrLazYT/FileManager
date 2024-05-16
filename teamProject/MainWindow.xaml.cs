@@ -298,6 +298,7 @@ namespace teamProject
             }
             return newName;
         }
+        //
         private void Update_Click(object sender, RoutedEventArgs e)
         {
             UpdateItems();
