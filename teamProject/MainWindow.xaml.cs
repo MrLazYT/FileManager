@@ -70,20 +70,42 @@ namespace teamProject
             {
                 string itemName = Path.GetFileName(itemPath);
                 DateTime itemDate = Directory.GetLastWriteTime($"{itemPath}");
+                long itemSize = 0;
                 DItem dItem = new DItem();
 
                 if (type == "directory")
                 {
-                    dItem = new DDirectory(itemName, itemDate);
+                    itemSize = GetFolderSize(itemPath);
+                    dItem = new DDirectory(itemName, itemDate, itemSize);
                 }
                 else if (type == "file")
                 {
-                    long itemSize = new FileInfo(itemPath).Length;
+                    itemSize = new FileInfo(itemPath).Length;
                     dItem = new DFile(itemName, itemDate, itemSize);
                 }
 
                 model.AddItem(dItem);
             }
+        }
+
+        private long GetFolderSize(string curDirectoryPath)
+        {
+            long size = 0;
+
+            string[] directories = Directory.GetDirectories(curDirectoryPath);
+            string[] files = Directory.GetFiles(curDirectoryPath);
+
+            foreach (string directoryPath in directories)
+            {
+                size += GetFolderSize(directoryPath);
+            }
+
+            foreach (string filePath in files)
+            {
+                size += new FileInfo(filePath).Length;
+            }
+
+            return size;
         }
 
         private void OpenFile(DItem dObject)
@@ -147,48 +169,47 @@ namespace teamProject
     [AddINotifyPropertyChangedInterface]
     public class DItem
     {
+        private List<string> Units = new List<string>()
+        {
+            "B", "KB", "MB", "GB"
+        };
+
         public string Name { get; set; }
         public DateTime Date { get; set; }
+        public long Size { get; set; }
+        public string SizeString { get; set; }
 
         public DItem() { }
 
-        public DItem(string name, DateTime date)
+        public DItem(string name, DateTime date, long size)
         {
             Name = name;
             Date = date;
+
+            int unitIndex = 0;
+
+            Size = size;
+
+            while (Size >= 1024)
+            {
+                Size = Size / 1024;
+                unitIndex++;
+            }
+
+            SizeString = $"{Size} {Units[unitIndex]}";
+
         }
     }
 
     [AddINotifyPropertyChangedInterface]
     public class DDirectory : DItem
     {
-        public DDirectory(string name, DateTime date) : base(name, date) { }
+        public DDirectory(string name, DateTime date, long size) : base(name, date, size) { }
     }
 
     [AddINotifyPropertyChangedInterface]
     public class DFile : DItem
-    {
-        private List<string> Units = new List<string>()
-        {
-            "B", "KB", "MB", "GB"
-        };
-
-        public long Size { get; set; }
-        public string SizeString { get; set; }
-        
-        public DFile(string name, DateTime date, long size) : base(name, date)
-        {
-            int unitIndex = 0;
-
-            Size = size;
-            
-            while (Size >= 1024)
-            {
-                Size = Size / 1024;
-                unitIndex++;
-            }
-            
-            SizeString = $"{Size} {Units[unitIndex]}";
-        }
+    {   
+        public DFile(string name, DateTime date, long size) : base(name, date, size) { }
     }
 }
