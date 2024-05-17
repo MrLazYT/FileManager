@@ -15,6 +15,7 @@ namespace teamProject
     {
         private Model model;
         private string openedDirectory;
+      
         public MainWindow()
         {
             InitializeComponent();
@@ -33,10 +34,7 @@ namespace teamProject
             model.Path = Directory.GetCurrentDirectory();
             openedDirectory = model.Path;
         }
-        private void FetchFolders()
-        {
-
-        }
+       
 
         private void ItemGrid_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
@@ -65,6 +63,8 @@ namespace teamProject
             UpdateItemsByType(directories);
             UpdateItemsByType(files, "file");
             UpdateButtonState();
+
+            ItemsListBox.ItemsSource = model.Items;
         }
         private void UpdateButtonState()
         {
@@ -101,21 +101,26 @@ namespace teamProject
         private long GetFolderSize(string curDirectoryPath)
         {
             long size = 0;
-
-            string[] directories = Directory.GetDirectories(curDirectoryPath);
-            string[] files = Directory.GetFiles(curDirectoryPath);
-
-            foreach (string directoryPath in directories)
+            try
             {
-                size += GetFolderSize(directoryPath);
-            }
+                string[] directories = Directory.GetDirectories(curDirectoryPath);
+                string[] files = Directory.GetFiles(curDirectoryPath);
 
-            foreach (string filePath in files)
-            {
-                size += new FileInfo(filePath).Length;
-            }
+                foreach (string directoryPath in directories)
+                {
+                    size += GetFolderSize(directoryPath);
+                }
 
+                foreach (string filePath in files)
+                {
+                    size += new FileInfo(filePath).Length;
+                }
+
+                
+            }
+            catch (Exception ex) { }
             return size;
+
         }
 
         private void OpenFile(DItem dObject)
@@ -157,21 +162,62 @@ namespace teamProject
 
         private void NextBtn_Click(object sender, RoutedEventArgs e)
         {
+           
             if (model.CanGoForward())
             {
                 string nextPath = model.PopForwardPath();
-                model.Path = nextPath;
-                UpdateItems();
-                Directory.SetCurrentDirectory(model.Path);
-                openedDirectory = Directory.GetCurrentDirectory();
 
-            }
+              
+                if (Directory.Exists(nextPath))
+                {
+                    model.Path = nextPath;
+                    UpdateItems();
+                    Directory.SetCurrentDirectory(model.Path);
+                    openedDirectory = Directory.GetCurrentDirectory();
+                }
+                else
+                {
             
+                    model.RemoveForwardPath(nextPath);
+                    NextBtn.IsEnabled = false;
+                    MessageBox.Show("Цей шлях більше не існує.", "Помилка", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+            }
+
+
         }
 
         private void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
+            string phrase = SearchTextBox.Text.Trim();
+            if (string.IsNullOrEmpty(phrase))
+            {
+                UpdateItems();
+            }
+            else
+            {
+                SearchDirectories(model.Path, phrase); 
+            }
+        }
+        private async void SearchDirectories(string rootPath, string phrase)
+        {
+            List<string> foundItems = new List<string>();
+            await Task.Run(() =>
+            {
+                try
+                {
 
+                    foundItems.AddRange(Directory.EnumerateFileSystemEntries(rootPath, "*.*", SearchOption.AllDirectories)
+                                                 .Where(path => Path.GetFileName(path).Contains(phrase, StringComparison.OrdinalIgnoreCase)));
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Unable to access {rootPath}: {ex.Message}");
+                }
+            });
+
+            UpdateItemsByType(foundItems.ToArray());
+           
         }
         private void CreateFile_Click(object sender, RoutedEventArgs e)
         {
@@ -292,6 +338,7 @@ namespace teamProject
                     if (File.Exists(filePath))
                     {
                         File.Delete(filePath);
+                     
                     }
                     else if (Directory.Exists(filePath))
                     {
@@ -382,7 +429,25 @@ namespace teamProject
         {
             items = new ObservableCollection<DItem>();
         }
-
+        public void RemoveForwardPath(string path)
+        {
+            if (forwardPathHistory.Contains(path))
+            {
+                var tempStack = new Stack<string>(forwardPathHistory.Count);
+                while (forwardPathHistory.Count > 0)
+                {
+                    var currentPath = forwardPathHistory.Pop();
+                    if (currentPath != path)
+                    {
+                        tempStack.Push(currentPath);
+                    }
+                }
+                while (tempStack.Count > 0)
+                {
+                    forwardPathHistory.Push(tempStack.Pop());
+                }
+            }
+        }
         public void AddItem(DItem item)
         {
             items.Add(item);
@@ -420,6 +485,7 @@ namespace teamProject
 
         public bool CanGoForward() 
         {
+            
             return forwardPathHistory.Count > 0;
         }
     }
