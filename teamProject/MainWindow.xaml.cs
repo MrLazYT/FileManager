@@ -244,10 +244,22 @@ namespace teamProject
 
                 foreach (var fileToPaste in fileArray)
                 {
-                    var fileName = Path.GetFileName(fileToPaste);
-                    var destinationPath = Path.Combine(openedDirectory, fileName);
-                    var uniqueFileName = GetUniqueFileName(fileName);
-                    File.Copy(fileToPaste, uniqueFileName);
+                    if (File.Exists(fileToPaste))
+                    {
+                        var fileName = Path.GetFileName(fileToPaste);
+                        var destinationPath = Path.Combine(openedDirectory, fileName);
+                        var uniqueFileName = GetUniqueFileName(fileName);
+                        File.Copy(fileToPaste, uniqueFileName);
+                    }
+                    else if(Directory.Exists(fileToPaste))
+                    {
+                        var sourceeDirectoryName = new DirectoryInfo(fileToPaste).Name;
+                        var destinationPath = Path.Combine(openedDirectory, sourceeDirectoryName);
+                        var uniqueDirectoryName = GetUniqueFileName(sourceeDirectoryName);
+                        Directory.CreateDirectory(uniqueDirectoryName);
+                        CopyDirectory(fileToPaste, destinationPath);
+                    }
+
                 }
                 UpdateItems();
             }
@@ -256,20 +268,47 @@ namespace teamProject
                 MessageBox.Show($"Помилка вставки файлу: {ex.Message}", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+        private void CopyDirectory(string sourceDirectoryName, string destinationDirectoryName)
+        {
+            var directory = new DirectoryInfo(sourceDirectoryName);
+            var dirs = directory.GetDirectories();
 
+            Directory.CreateDirectory(destinationDirectoryName);
+
+            var files = directory.GetFiles();
+            foreach (var file in files)
+            {
+                var temqPath = Path.Combine(destinationDirectoryName, file.Name);
+                file.CopyTo(temqPath, false);
+            }
+
+            foreach (var subDir in dirs)
+            {
+                var tempPath = Path.Combine(destinationDirectoryName, subDir.Name);
+                CopyDirectory(subDir.FullName, tempPath);
+            }
+        }
         private void Delete_Click(object sender, RoutedEventArgs e)
         {
             try
             {
                 var selectedFiles = ItemsListBox.SelectedItems;
-
-                foreach (DItem selectedFile in selectedFiles)
+                var selectedItems = new List<DItem>(ItemsListBox.SelectedItems.Cast<DItem>());
+                foreach (DItem selectedFile in selectedItems)
                 {
                     var filePath = Path.Combine(openedDirectory, selectedFile.Name);
-                    File.Delete(filePath);
+                    if (File.Exists(filePath))
+                    {
+                        File.Delete(filePath);
+                    }
+                    else if (Directory.Exists(filePath))
+                    {
+                        Directory.Delete(filePath, true);
+                    }
+                    UpdateItems();
                 }
-                UpdateItems();
             }
+
             catch (Exception ex)
             {
                 MessageBox.Show($"Помилка видалення файлу: {ex.Message}", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -328,6 +367,7 @@ namespace teamProject
             }
             return newName;
         }
+        //
         private void Update_Click(object sender, RoutedEventArgs e)
         {
             UpdateItems();
