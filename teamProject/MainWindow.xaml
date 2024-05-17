@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:teamProject"
         d:DataContext="{d:DesignInstance local:Model, IsDesignTimeCreatable=True}"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="450" Width="817">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="150"/>
@@ -73,7 +73,7 @@
 
                         <TextBlock Grid.Column="1" Name="ObjectName" Text="{Binding Name}"/>
                         <TextBlock Grid.Column="2" Name="ObjectDate" Text="{Binding Date}"/>
-                        <TextBlock Grid.Column="3" Name="ObjectSize" Text="{Binding Size}">MB</TextBlock>
+                        <TextBlock Grid.Column="3" Name="ObjectSize" Text="{Binding SizeString}"></TextBlock>
                     </Grid>
                 </DataTemplate>
             </ListBox.ItemTemplate>
