@@ -15,7 +15,7 @@ namespace teamProject
     {
         private Model model;
         private string openedDirectory;
-      
+        private string _soursDirectory;
         public MainWindow()
         {
             InitializeComponent();
@@ -177,14 +177,11 @@ namespace teamProject
                 }
                 else
                 {
-            
                     model.RemoveForwardPath(nextPath);
                     NextBtn.IsEnabled = false;
                     MessageBox.Show("Цей шлях більше не існує.", "Помилка", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
             }
-
-
         }
 
         private void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -256,19 +253,20 @@ namespace teamProject
             {
                 var selectedFiles = ItemsListBox.SelectedItems;
                 var fileListForClipboard = new StringCollection();
-
+                string filePath = "";
                 foreach (DItem selectedFile in selectedFiles)
                 {
-                    var filePath = Path.Combine(Directory.GetCurrentDirectory(), selectedFile.Name);
+                    filePath = Path.Combine(Directory.GetCurrentDirectory(), selectedFile.Name);
                     fileListForClipboard.Add(filePath);
                 }
-
+                _soursDirectory = filePath;
                 Clipboard.SetFileDropList(fileListForClipboard);
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Помилка копіювання файлу: {ex.Message}", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+
             pasteItem.IsEnabled = true;
             
         }
@@ -289,15 +287,23 @@ namespace teamProject
                         var uniqueFileName = GetUniqueFileName(fileName);
                         File.Copy(fileToPaste, uniqueFileName);
                     }
-                    else if(Directory.Exists(fileToPaste))
+                    else if (Directory.Exists(fileToPaste))
                     {
                         var sourceeDirectoryName = new DirectoryInfo(fileToPaste).Name;
                         var destinationPath = Path.Combine(openedDirectory, sourceeDirectoryName);
                         var uniqueDirectoryName = GetUniqueFileName(sourceeDirectoryName);
-                        Directory.CreateDirectory(uniqueDirectoryName);
-                        CopyDirectory(fileToPaste, destinationPath);
-                    }
 
+                        if (openedDirectory == _soursDirectory)
+                        {
+                            MessageBox.Show("Не можливо вставити кореневу папку в саму ж себе");
+                        }
+                        else{
+                            Directory.CreateDirectory(uniqueDirectoryName);
+                            CopyDirectory(fileToPaste, destinationPath);
+                        }
+
+
+                    }
                 }
                 UpdateItems();
             }
@@ -308,12 +314,13 @@ namespace teamProject
         }
         private void CopyDirectory(string sourceDirectoryName, string destinationDirectoryName)
         {
-            var directory = new DirectoryInfo(sourceDirectoryName);
-            var dirs = directory.GetDirectories();
 
-            Directory.CreateDirectory(destinationDirectoryName);
+                var directory = new DirectoryInfo(sourceDirectoryName);
+                var dirs = directory.GetDirectories();
 
-            var files = directory.GetFiles();
+                Directory.CreateDirectory(destinationDirectoryName);
+
+                var files = directory.GetFiles();
             foreach (var file in files)
             {
                 var temqPath = Path.Combine(destinationDirectoryName, file.Name);
@@ -324,6 +331,7 @@ namespace teamProject
             {
                 var tempPath = Path.Combine(destinationDirectoryName, subDir.Name);
                 CopyDirectory(subDir.FullName, tempPath);
+
             }
         }
         private void Delete_Click(object sender, RoutedEventArgs e)
@@ -395,6 +403,7 @@ namespace teamProject
             string extension = Path.GetExtension(fileName);
             string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(fileName);
             string newName = fileName;
+
             if (File.Exists(Path.Combine(directoryPath, newName)))
             {
                 int count = 2;
