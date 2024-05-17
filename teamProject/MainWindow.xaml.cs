@@ -53,19 +53,42 @@ namespace teamProject
             }
         }
 
-        private void UpdateItems()
+        private async void UpdateItems()
         {
             model.ClearItems();
 
             string[] directories = Directory.GetDirectories(model.Path);
             string[] files = Directory.GetFiles(model.Path);
 
-            UpdateItemsByType(directories);
-            UpdateItemsByType(files, "file");
+            await UpdateItemsByTypeAsync(directories);
+            await UpdateItemsByTypeAsync(files, "file");
+            UpdateDirectoriesSize();
             UpdateButtonState();
 
             ItemsListBox.ItemsSource = model.Items;
         }
+
+        private async void UpdateDirectoriesSize()
+        {
+            try
+            {
+                foreach (DItem dItem in ItemsListBox.Items)
+                {
+                    if (dItem is DDirectory)
+                    {
+                        string itemPath = Path.Combine(model.Path, dItem.Name);
+                        long itemSize = await GetItemsSizeAsync(itemPath);
+                        dItem.UpdateSize(itemSize);
+                    }
+                }
+            }
+            catch (InvalidOperationException) { }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Непередбачена помилка: {ex.Message}", "Помилка розрахунку розміру папки.", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
         private void UpdateButtonState()
         {
             DirectoryInfo parentDir = Directory.GetParent(model.Path);
@@ -74,53 +97,61 @@ namespace teamProject
             
             NextBtn.IsEnabled = model.CanGoForward();
         }
-        private void UpdateItemsByType(string[] items, string type = "directory")
+        private Task UpdateItemsByTypeAsync(string[] items, string type = "directory")
         {
-            foreach (string itemPath in items)
+            return Task.Run(() =>
             {
-                string itemName = Path.GetFileName(itemPath);
-                DateTime itemDate = Directory.GetLastWriteTime($"{itemPath}");
-                long itemSize = 0;
-                DItem dItem = new DItem();
-
-                if (type == "directory")
+                foreach (string itemPath in items)
                 {
-                    itemSize = GetFolderSize(itemPath);
-                    dItem = new DDirectory(itemName, itemDate, itemSize);
-                }
-                else if (type == "file")
-                {
-                    itemSize = new FileInfo(itemPath).Length;
-                    dItem = new DFile(itemName, itemDate, itemSize);
-                }
+                    string itemName = Path.GetFileName(itemPath);
+                    DateTime itemDate = Directory.GetLastWriteTime($"{itemPath}");
+                    DItem dItem = new DItem();
 
-                model.AddItem(dItem);
-            }
+                    if (type == "directory")
+                    {
+                        dItem = new DDirectory(itemName, itemDate);
+                    }
+                    else if (type == "file")
+                    {
+                        long itemSize = new FileInfo(itemPath).Length;
+                        dItem = new DFile(itemName, itemDate, itemSize);
+                    }
+
+                    Dispatcher.Invoke(() =>
+                    {
+                        model.AddItem(dItem);
+                    });
+                }
+            });
         }
 
-        private long GetFolderSize(string curDirectoryPath)
+        private Task<long> GetItemsSizeAsync(string curDirectoryPath)
         {
-            long size = 0;
-            try
+            return Task.Run(async () =>
             {
-                string[] directories = Directory.GetDirectories(curDirectoryPath);
-                string[] files = Directory.GetFiles(curDirectoryPath);
+                long size = 0;
 
-                foreach (string directoryPath in directories)
+                try
                 {
-                    size += GetFolderSize(directoryPath);
+                    string[] directories = Directory.GetDirectories(curDirectoryPath);
+                    string[] files = Directory.GetFiles(curDirectoryPath);
+
+                    foreach (string directoryPath in directories)
+                    {
+                        size += await GetItemsSizeAsync(directoryPath);
+                    }
+
+                    foreach (string filePath in files)
+                    {
+                        size += new FileInfo(filePath).Length;
+                    }
+
+
                 }
+                catch { }
 
-                foreach (string filePath in files)
-                {
-                    size += new FileInfo(filePath).Length;
-                }
-
-                
-            }
-            catch (Exception ex) { }
-            return size;
-
+                return size;
+            });
         }
 
         private void OpenFile(DItem dObject)
@@ -138,12 +169,27 @@ namespace teamProject
 
         private void OpenDirectory(DItem dObject)
         {
-            model.PushBackPath(model.Path); 
-            model.Path = Path.Combine(model.Path, dObject.Name);
-            Directory.SetCurrentDirectory(model.Path);
-            openedDirectory = Directory.GetCurrentDirectory();
-            model.forwardPathHistory.Clear();
-            UpdateItems();
+            try
+            {
+                model.PushBackPath(model.Path);
+                model.Path = Path.Combine(model.Path, dObject.Name);
+                Directory.SetCurrentDirectory(model.Path);
+                openedDirectory = Directory.GetCurrentDirectory();
+                model.forwardPathHistory.Clear();
+                UpdateItems();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                MessageBox.Show("Ви не маєте доступу до цієї папки.", "Неавторизований доступ", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            catch (DirectoryNotFoundException)
+            {
+                MessageBox.Show("Не можливо знайти шлях до папки.", "Невірне розташування", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Непередбачена помилка: {ex.Message}", "Помилка шляху папки");
+            }
         }
         
         private void BackBtn_Click(object sender, RoutedEventArgs e)
@@ -213,7 +259,7 @@ namespace teamProject
                 }
             });
 
-            UpdateItemsByType(foundItems.ToArray());
+            UpdateItemsByTypeAsync(foundItems.ToArray());
            
         }
         private void CreateFile_Click(object sender, RoutedEventArgs e)
@@ -511,15 +557,18 @@ namespace teamProject
         public string Name { get; set; }
         public DateTime Date { get; set; }
         public long Size { get; set; }
-        public string SizeString { get; set; }
+        public string SizeString { get; set; } = "Розрахунок...";
 
         public DItem() { }
 
-        public DItem(string name, DateTime date, long size)
+        public DItem(string name, DateTime date)
         {
             Name = name;
             Date = date;
+        }
 
+        public void UpdateSize(long size)
+        {
             int unitIndex = 0;
 
             Size = size;
@@ -531,19 +580,21 @@ namespace teamProject
             }
 
             SizeString = $"{Size} {Units[unitIndex]}";
-
         }
     }
 
     [AddINotifyPropertyChangedInterface]
     public class DDirectory : DItem
     {
-        public DDirectory(string name, DateTime date, long size) : base(name, date, size) { }
+        public DDirectory(string name, DateTime date) : base(name, date) { }
     }
 
     [AddINotifyPropertyChangedInterface]
     public class DFile : DItem
     {   
-        public DFile(string name, DateTime date, long size) : base(name, date, size) { }
+        public DFile(string name, DateTime date, long size) : base(name, date)
+        {
+            UpdateSize(size);
+        }
     }
 }

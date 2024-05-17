@@ -73,7 +73,7 @@
 
                         <TextBlock Grid.Column="1" Name="ObjectName" Text="{Binding Name}"/>
                         <TextBlock Grid.Column="2" Name="ObjectDate" Text="{Binding Date}"/>
-                        <TextBlock Grid.Column="3" Name="ObjectSize" Text="{Binding SizeString}"></TextBlock>
+                        <TextBlock Grid.Column="3" Name="ObjectSize"><Run Text="{Binding SizeString}"/></TextBlock>
                     </Grid>
                 </DataTemplate>
             </ListBox.ItemTemplate>
