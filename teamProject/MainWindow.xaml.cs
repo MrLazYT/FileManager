@@ -312,6 +312,7 @@ namespace teamProject
                 MessageBox.Show($"Помилка вставки файлу: {ex.Message}", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
         private void CopyDirectory(string sourceDirectoryName, string destinationDirectoryName)
         {
 
