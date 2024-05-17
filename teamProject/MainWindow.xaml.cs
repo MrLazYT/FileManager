@@ -33,6 +33,10 @@ namespace teamProject
             model.Path = Directory.GetCurrentDirectory();
             openedDirectory = model.Path;
         }
+        private void FetchFolders()
+        {
+
+        }
 
         private void ItemGrid_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
@@ -51,14 +55,6 @@ namespace teamProject
             }
         }
 
-        private void OpenDirectory(DItem dObject)
-        {
-            model.Path = Path.Combine(model.Path, dObject.Name);
-            Directory.SetCurrentDirectory(model.Path);
-            openedDirectory = Directory.GetCurrentDirectory();
-            UpdateItems();
-        }
-
         private void UpdateItems()
         {
             model.ClearItems();
@@ -68,8 +64,16 @@ namespace teamProject
 
             UpdateItemsByType(directories);
             UpdateItemsByType(files, "file");
+            UpdateButtonState();
         }
+        private void UpdateButtonState()
+        {
+            DirectoryInfo parentDir = Directory.GetParent(model.Path);
+            BackBtn.IsEnabled = (parentDir != null);
 
+            
+            NextBtn.IsEnabled = model.CanGoForward();
+        }
         private void UpdateItemsByType(string[] items, string type = "directory")
         {
             foreach (string itemPath in items)
@@ -91,7 +95,7 @@ namespace teamProject
                 model.AddItem(dItem);
             }
         }
-
+        
         private void OpenFile(DItem dObject)
         {
             string filePath = Path.Combine(model.Path, dObject.Name);
@@ -104,12 +108,54 @@ namespace teamProject
             
             process.Start();
         }
+
+        private void OpenDirectory(DItem dObject)
+        {
+            model.PushBackPath(model.Path); 
+            model.Path = Path.Combine(model.Path, dObject.Name);
+
+            model.forwardPathHistory.Clear();
+            UpdateItems();
+        }
+        
         private void BackBtn_Click(object sender, RoutedEventArgs e)
         {
-
+            DirectoryInfo parentDir = Directory.GetParent(model.Path);
+            
+            if (parentDir != null)
+            {
+                model.PushForwardPath(model.Path); 
+                model.Path = parentDir.FullName;
+                UpdateItems();
+            }
+        }
+        
+        private void BackBtn_Click(object sender, RoutedEventArgs e)
+        {
+            DirectoryInfo parentDir = Directory.GetParent(model.Path);
+            if (parentDir != null)
+            {
+                model.PushForwardPath(model.Path); 
+                model.Path = parentDir.FullName;
+                UpdateItems();
+            }
+            
         }
 
+
         private void NextBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (model.CanGoForward())
+            {
+                string nextPath = model.PopForwardPath();
+                model.Path = nextPath;
+                UpdateItems();
+              
+            }
+            
+        }
+
+        private void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
 
         }
@@ -242,6 +288,7 @@ namespace teamProject
             // код Семена
         }
         //------------------------------------------------------------
+        
         private string GetUniqueFileName(string fileName)
         {
             string directoryPath = Directory.GetCurrentDirectory();
@@ -270,23 +317,15 @@ namespace teamProject
     public class Model
     {
         private ObservableCollection<DItem> items;
+        private Stack<string> backPathHistory = new Stack<string>(); 
+        public Stack<string> forwardPathHistory = new Stack<string>(); 
 
         public IEnumerable<DItem> Items => items;
         public string Path { get; set; }
-        public string TotalSize { get; set; }
-        public string ItemCount { get; set; }
 
         public Model()
         {
             items = new ObservableCollection<DItem>();
-        }
-
-        public void AddItemRange(IEnumerable<DDirectory> directories)
-        {
-            foreach (DDirectory directory in directories)
-            {
-                AddItem(directory);
-            }
         }
 
         public void AddItem(DItem item)
@@ -298,7 +337,36 @@ namespace teamProject
         {
             items.Clear();
         }
+        
+        public void PushBackPath(string path)
+        {
+            backPathHistory.Push(path);
+        }
 
+        public string PopBackPath()
+        {
+            return backPathHistory.Count > 0 ? backPathHistory.Pop() : null;
+        }
+
+        public void PushForwardPath(string path)
+        {
+            forwardPathHistory.Push(path);
+        }
+
+        public string PopForwardPath()
+        {
+            return forwardPathHistory.Count > 0 ? forwardPathHistory.Pop() : null;
+        }
+
+        public bool CanGoBack() 
+        {
+            return backPathHistory.Count > 0;
+        }
+
+        public bool CanGoForward() 
+        {
+            return forwardPathHistory.Count > 0;
+        }
     }
 
     [AddINotifyPropertyChangedInterface]

@@ -23,7 +23,7 @@
             <Button Name="BackBtn" Click="BackBtn_Click" Content="←" FontSize="30" VerticalContentAlignment="Top"/>
             <Button Name="NextBtn" Click="NextBtn_Click" Content="→" FontSize="30" VerticalContentAlignment="Top"/>
 
-            <TextBox Name="SearchTextBox" Text="Пошук" VerticalContentAlignment="Center" DockPanel.Dock="Right" Width="220"/>
+            <TextBox Name="SearchTextBox" Text="Пошук" VerticalContentAlignment="Center" DockPanel.Dock="Right" Width="220" TextChanged="SearchTextBox_TextChanged"/>
             <TextBox Name="PathTextBox" Text="{Binding Path}" VerticalContentAlignment="Center" IsReadOnly="True"/>
         </DockPanel>
 
@@ -57,6 +57,7 @@
                     <MenuItem x:Name="movItem" Header="Перемістити" Click="Mov_Click"/>
                 </ContextMenu>
             </ListBox.ContextMenu>
+          
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <Grid Name="ItemGrid" MouseDown="ItemGrid_MouseDown">
