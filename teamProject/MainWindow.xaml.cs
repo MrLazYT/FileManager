@@ -135,7 +135,8 @@ namespace teamProject
         {
             model.PushBackPath(model.Path); 
             model.Path = Path.Combine(model.Path, dObject.Name);
-
+            Directory.SetCurrentDirectory(model.Path);
+            openedDirectory = Directory.GetCurrentDirectory();
             model.forwardPathHistory.Clear();
             UpdateItems();
         }
@@ -149,21 +150,10 @@ namespace teamProject
                 model.PushForwardPath(model.Path); 
                 model.Path = parentDir.FullName;
                 UpdateItems();
+                Directory.SetCurrentDirectory(model.Path);
+                openedDirectory = Directory.GetCurrentDirectory();
             }
         }
-        
-        private void BackBtn_Click(object sender, RoutedEventArgs e)
-        {
-            DirectoryInfo parentDir = Directory.GetParent(model.Path);
-            if (parentDir != null)
-            {
-                model.PushForwardPath(model.Path); 
-                model.Path = parentDir.FullName;
-                UpdateItems();
-            }
-            
-        }
-
 
         private void NextBtn_Click(object sender, RoutedEventArgs e)
         {
@@ -172,7 +162,9 @@ namespace teamProject
                 string nextPath = model.PopForwardPath();
                 model.Path = nextPath;
                 UpdateItems();
-              
+                Directory.SetCurrentDirectory(model.Path);
+                openedDirectory = Directory.GetCurrentDirectory();
+
             }
             
         }
@@ -367,10 +359,11 @@ namespace teamProject
             }
             return newName;
         }
-        //
         private void Update_Click(object sender, RoutedEventArgs e)
         {
             UpdateItems();
+            Directory.SetCurrentDirectory(model.Path);
+            openedDirectory = Directory.GetCurrentDirectory();
             pasteItem.IsEnabled = false;
         }
     }
