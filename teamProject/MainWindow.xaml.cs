@@ -1,16 +1,20 @@
-﻿using PropertyChanged;
+﻿using Microsoft.VisualBasic;
+using Microsoft.Win32;
+using PropertyChanged;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace teamProject
 {
     public partial class MainWindow : Window
     {
         private Model model;
-
+        private string openedDirectory;
         public MainWindow()
         {
             InitializeComponent();
@@ -26,7 +30,8 @@ namespace teamProject
             string compAndUserNames = System.Security.Principal.WindowsIdentity.GetCurrent().Name;
             string username = compAndUserNames.Split('\\')[1];
 
-            model.Path = $"C:/Users/{username}/Downloads";
+            model.Path = Directory.GetCurrentDirectory();
+            openedDirectory = model.Path;
         }
         private void FetchFolders()
         {
@@ -49,8 +54,6 @@ namespace teamProject
                 }
             }
         }
-
-        
 
         private void UpdateItems()
         {
@@ -92,10 +95,7 @@ namespace teamProject
                 model.AddItem(dItem);
             }
         }
-        /// <summary>
-        /// /
-        /// </summary>
-        /// <param name="dObject"></param>
+        
         private void OpenFile(DItem dObject)
         {
             string filePath = Path.Combine(model.Path, dObject.Name);
@@ -105,7 +105,7 @@ namespace teamProject
             startInfo.UseShellExecute = true;
             startInfo.FileName = filePath;
             process.StartInfo = startInfo;
-
+            
             process.Start();
         }
 
@@ -118,7 +118,18 @@ namespace teamProject
             UpdateItems();
         }
         
-
+        private void BackBtn_Click(object sender, RoutedEventArgs e)
+        {
+            DirectoryInfo parentDir = Directory.GetParent(model.Path);
+            
+            if (parentDir != null)
+            {
+                model.PushForwardPath(model.Path); 
+                model.Path = parentDir.FullName;
+                UpdateItems();
+            }
+        }
+        
         private void BackBtn_Click(object sender, RoutedEventArgs e)
         {
             DirectoryInfo parentDir = Directory.GetParent(model.Path);
@@ -127,7 +138,6 @@ namespace teamProject
                 model.PushForwardPath(model.Path); 
                 model.Path = parentDir.FullName;
                 UpdateItems();
-               
             }
             
         }
@@ -148,6 +158,158 @@ namespace teamProject
         private void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
 
+        }
+        private void CreateFile_Click(object sender, RoutedEventArgs e)
+        {
+            var saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*|Folder (*)|*";
+            saveFileDialog.FilterIndex = 3;
+
+            string currentDirectory = openedDirectory;
+            saveFileDialog.InitialDirectory = currentDirectory;
+
+            bool? res = saveFileDialog.ShowDialog();
+            if (res == true)
+            {
+                try
+                {
+                    string uniqueFileName = GetUniqueFileName(saveFileDialog.FileName);
+                    if (saveFileDialog.FilterIndex != 3)
+                    {
+                        File.Create(uniqueFileName);
+                    }
+                    else
+                    {
+                        Directory.CreateDirectory(uniqueFileName);
+                    }
+                    UpdateItems();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Помилка створення файлу: {ex.Message}", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+        private void Copy_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var selectedFiles = ItemsListBox.SelectedItems;
+                var fileListForClipboard = new StringCollection();
+
+                foreach (DItem selectedFile in selectedFiles)
+                {
+                    var filePath = Path.Combine(Directory.GetCurrentDirectory(), selectedFile.Name);
+                    fileListForClipboard.Add(filePath);
+                }
+
+                Clipboard.SetFileDropList(fileListForClipboard);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Помилка копіювання файлу: {ex.Message}", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            pasteItem.IsEnabled = true;
+            
+        }
+        private void Paste_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var filesToPaste = Clipboard.GetFileDropList();
+                string[] fileArray = new string[filesToPaste.Count];
+                filesToPaste.CopyTo(fileArray, 0);
+
+                foreach (var fileToPaste in fileArray)
+                {
+                    var fileName = Path.GetFileName(fileToPaste);
+                    var destinationPath = Path.Combine(openedDirectory, fileName);
+                    var uniqueFileName = GetUniqueFileName(fileName);
+                    File.Copy(fileToPaste, uniqueFileName);
+                }
+                UpdateItems();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Помилка вставки файлу: {ex.Message}", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void Delete_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var selectedFiles = ItemsListBox.SelectedItems;
+
+                foreach (DItem selectedFile in selectedFiles)
+                {
+                    var filePath = Path.Combine(openedDirectory, selectedFile.Name);
+                    File.Delete(filePath);
+                }
+                UpdateItems();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Помилка видалення файлу: {ex.Message}", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+        private void Rename_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                DFile selectedFile = ItemsListBox.SelectedItem as DFile;
+                if (selectedFile == null)
+                {
+                    MessageBox.Show("Виберіть файл для перейменування.", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                var oldFilePath = Path.Combine(openedDirectory, selectedFile.Name);
+
+                var newFileName = Interaction.InputBox("Введіть нову назву файлу:", "Перейменувати файл", selectedFile.Name);
+
+                if (!string.IsNullOrWhiteSpace(newFileName))
+                {
+                    var newFilePath = Path.Combine(openedDirectory, newFileName);
+
+                    File.Move(oldFilePath, newFilePath);
+                    UpdateItems();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Помилка перейменування файлу: {ex.Message}", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+        
+        //------------------------------------------------------------
+        private void Mov_Click(object sender, RoutedEventArgs e)
+        {
+            // код Семена
+        }
+        //------------------------------------------------------------
+        
+        private string GetUniqueFileName(string fileName)
+        {
+            string directoryPath = Directory.GetCurrentDirectory();
+            string extension = Path.GetExtension(fileName);
+            string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(fileName);
+            string newName = fileName;
+            if (File.Exists(Path.Combine(directoryPath, newName)))
+            {
+                int count = 2;
+                while (File.Exists(Path.Combine(directoryPath, newName)))
+                {
+                    newName = $"{fileNameWithoutExtension}({count}){extension}";
+                    count++;
+                }
+            }
+            return newName;
+        }
+        private void Update_Click(object sender, RoutedEventArgs e)
+        {
+            UpdateItems();
+            pasteItem.IsEnabled = false;
         }
     }
 
@@ -175,7 +337,6 @@ namespace teamProject
         {
             items.Clear();
         }
-
         
         public void PushBackPath(string path)
         {
