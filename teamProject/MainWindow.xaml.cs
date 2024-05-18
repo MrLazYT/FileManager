@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace teamProject
 {
@@ -483,6 +484,27 @@ namespace teamProject
         private void FolderListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
 
+        }
+
+        private void PathTextBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                try
+                {
+                    model.Path = PathTextBox.Text;
+                    Directory.SetCurrentDirectory(model.Path);
+                    UpdateItems();
+                }
+                catch (DirectoryNotFoundException)
+                {
+                    MessageBox.Show("Вказано невірний шлях.", "Помилка шляху", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Непердбачена помилка шляху: {ex.Message}", "Помилка шляху", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
         }
     }
 

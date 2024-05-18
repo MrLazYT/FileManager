@@ -24,7 +24,7 @@
             <Button Name="NextBtn" Click="NextBtn_Click" Content="→" FontSize="30" VerticalContentAlignment="Top"/>
 
             <TextBox Name="SearchTextBox"  VerticalContentAlignment="Center" DockPanel.Dock="Right" Width="220" TextChanged="SearchTextBox_TextChanged"/>
-            <TextBox Name="PathTextBox" Text="{Binding Path}" VerticalContentAlignment="Center" IsReadOnly="True"/>
+            <TextBox Name="PathTextBox" Text="{Binding Path}" VerticalContentAlignment="Center" KeyDown="PathTextBox_KeyDown"/>
         </DockPanel>
 
         <ListBox Name="FolderListBox" Grid.Row="1" ItemsSource="{Binding MyFolders}" d:ItemsSource="{d:SampleData ItemCount=5}" SelectionChanged="FolderListBox_SelectionChanged" >
