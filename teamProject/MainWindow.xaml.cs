@@ -7,7 +7,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 
 namespace teamProject
 {
@@ -28,8 +27,7 @@ namespace teamProject
 
         private void GetDefaultPath()
         {
-            string compAndUserNames = System.Security.Principal.WindowsIdentity.GetCurrent().Name;
-            string username = compAndUserNames.Split('\\')[1];
+            string username = Environment.UserName;
 
             model.Path = Directory.GetCurrentDirectory();
             openedDirectory = model.Path;
@@ -469,21 +467,50 @@ namespace teamProject
             openedDirectory = Directory.GetCurrentDirectory();
             pasteItem.IsEnabled = false;
         }
+
+        private void MyFolder_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            DDirectory selectedDir = (DDirectory)FolderListBox.SelectedItem;
+            
+            if (e.ClickCount >= 2 && model.Path != selectedDir.Path)
+            {
+                model.Path = selectedDir.Path;
+
+                UpdateItems();
+            }
+        }
+
+        private void FolderListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+        }
     }
 
     [AddINotifyPropertyChangedInterface]
     public class Model
     {
         private ObservableCollection<DItem> items;
+        private ObservableCollection<DDirectory> myFolders;
         private Stack<string> backPathHistory = new Stack<string>(); 
         public Stack<string> forwardPathHistory = new Stack<string>(); 
 
-        public IEnumerable<DItem> Items => items;
         public string Path { get; set; }
+        public IEnumerable<DItem> Items => items;
+
+        public IEnumerable<DDirectory> MyFolders => myFolders;
 
         public Model()
         {
             items = new ObservableCollection<DItem>();
+            myFolders = new ObservableCollection<DDirectory>()
+            {
+                new DDirectory("Робочий стіл", Environment.GetFolderPath(Environment.SpecialFolder.Desktop)),
+                new DDirectory("Завантаження", @$"C:\Users\{Environment.UserName}\Downloads"),
+                new DDirectory("Документи", Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)),
+                new DDirectory("Зображення", Environment.GetFolderPath(Environment.SpecialFolder.MyPictures)),
+                new DDirectory("Відео", Environment.GetFolderPath(Environment.SpecialFolder.MyVideos)),
+                new DDirectory("Музика", Environment.GetFolderPath(Environment.SpecialFolder.MyMusic)),
+            };
         }
         public void RemoveForwardPath(string path)
         {
@@ -586,7 +613,15 @@ namespace teamProject
     [AddINotifyPropertyChangedInterface]
     public class DDirectory : DItem
     {
+        public string Path { get; set; }
+
         public DDirectory(string name, DateTime date) : base(name, date) { }
+        
+        public DDirectory(string name, string path)
+        {
+            Name = name;
+            Path = path;
+        }
     }
 
     [AddINotifyPropertyChangedInterface]

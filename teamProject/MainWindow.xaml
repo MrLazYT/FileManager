@@ -27,19 +27,19 @@
             <TextBox Name="PathTextBox" Text="{Binding Path}" VerticalContentAlignment="Center" IsReadOnly="True"/>
         </DockPanel>
 
-        <ListBox Name="FolderListBox" Grid.Row="1" d:ItemsSource="{d:SampleData ItemCount=5}" >
+        <ListBox Name="FolderListBox" Grid.Row="1" ItemsSource="{Binding MyFolders}" d:ItemsSource="{d:SampleData ItemCount=5}" SelectionChanged="FolderListBox_SelectionChanged" >
             <ListBox.ItemTemplate>
                 <DataTemplate>
-                    <Grid>
+                    <Grid MouseDown="MyFolder_MouseDown">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="30"/>
-                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="105"/>
                         </Grid.ColumnDefinitions>
 
                         <Image Grid.Column="0" Width="30" Height="30">
                         </Image>
 
-                        <TextBlock Grid.Column="1" Name="FolderName"/>
+                        <TextBlock Grid.Column="1" Name="FolderName" Text="{Binding Name}"/>
                     </Grid>
                 </DataTemplate>
             </ListBox.ItemTemplate>
