@@ -26,6 +26,61 @@ namespace teamProject
             UpdateItems();
         }
 
+        private void MinimizeButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.WindowState = WindowState.Minimized;
+        }
+
+        private void MaximizeRestoreButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (this.WindowState == WindowState.Maximized)
+            {
+                this.WindowState = WindowState.Normal;
+            }
+            else
+            {
+                this.WindowState = WindowState.Maximized;
+            }
+        }
+
+        private void CloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+
+        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ClickCount == 2)
+            {
+                MaximizeRestoreButton_Click(sender, e);
+            }
+            else
+            {
+                this.DragMove();
+            }
+        }
+
+        private void PathTextBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                try
+                {
+                    model.Path = PathTextBox.Text;
+                    Directory.SetCurrentDirectory(model.Path);
+                    UpdateItems();
+                }
+                catch (DirectoryNotFoundException)
+                {
+                    MessageBox.Show("Вказано невірний шлях.", "Помилка шляху", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Непердбачена помилка шляху: {ex.Message}", "Помилка шляху", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
         private void GetDefaultPath()
         {
             string compAndUserNames = System.Security.Principal.WindowsIdentity.GetCurrent().Name;
@@ -183,8 +238,6 @@ namespace teamProject
                     MessageBox.Show("Цей шлях більше не існує.", "Помилка", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
             }
-
-
         }
 
         private void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -206,7 +259,6 @@ namespace teamProject
             {
                 try
                 {
-
                     foundItems.AddRange(Directory.EnumerateFileSystemEntries(rootPath, "*.*", SearchOption.AllDirectories)
                                                  .Where(path => Path.GetFileName(path).Contains(phrase, StringComparison.OrdinalIgnoreCase)));
                 }
@@ -217,8 +269,8 @@ namespace teamProject
             });
 
             UpdateItemsByType(foundItems.ToArray());
-           
         }
+
         private void CreateFile_Click(object sender, RoutedEventArgs e)
         {
             var saveFileDialog = new SaveFileDialog();
@@ -250,6 +302,7 @@ namespace teamProject
                 }
             }
         }
+
         private void Copy_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -270,7 +323,6 @@ namespace teamProject
                 MessageBox.Show($"Помилка копіювання файлу: {ex.Message}", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             pasteItem.IsEnabled = true;
-            
         }
         private void Paste_Click(object sender, RoutedEventArgs e)
         {
@@ -297,7 +349,6 @@ namespace teamProject
                         Directory.CreateDirectory(uniqueDirectoryName);
                         CopyDirectory(fileToPaste, destinationPath);
                     }
-
                 }
                 UpdateItems();
             }
@@ -306,6 +357,7 @@ namespace teamProject
                 MessageBox.Show($"Помилка вставки файлу: {ex.Message}", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
         private void CopyDirectory(string sourceDirectoryName, string destinationDirectoryName)
         {
             var directory = new DirectoryInfo(sourceDirectoryName);
@@ -326,6 +378,7 @@ namespace teamProject
                 CopyDirectory(subDir.FullName, tempPath);
             }
         }
+
         private void Delete_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -412,6 +465,19 @@ namespace teamProject
             Directory.SetCurrentDirectory(model.Path);
             openedDirectory = Directory.GetCurrentDirectory();
             pasteItem.IsEnabled = false;
+        }
+        private void UpDate_btn(object sender, RoutedEventArgs e)
+        {
+            UpdateItems();
+            pasteItem.IsEnabled = false;
+        }
+
+        private void Home_btn(object sender, RoutedEventArgs e)
+        {
+        }
+
+        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
         }
     }
 
@@ -521,7 +587,6 @@ namespace teamProject
             }
 
             SizeString = $"{Size} {Units[unitIndex]}";
-
         }
     }
 

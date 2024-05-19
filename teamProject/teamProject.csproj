@@ -10,7 +10,42 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Assets\angle-left.png" />
+    <None Remove="Assets\angle-right.png" />
+    <None Remove="Assets\close.png" />
+    <None Remove="Assets\copy.png" />
+    <None Remove="Assets\create.png" />
+    <None Remove="Assets\delete.png" />
+    <None Remove="Assets\edit.png" />
+    <None Remove="Assets\house-chimney.png" />
+    <None Remove="Assets\maximize.png" />
+    <None Remove="Assets\minimize.png" />
+    <None Remove="Assets\paste.png" />
+    <None Remove="Assets\refresh.png" />
+    <None Remove="Assets\rename.png" />
+    <None Remove="Assets\sort.png" />
+    <None Remove="FodyWeavers.xml" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="PropertyChanged.Fody" Version="4.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\angle-left.png" />
+    <Resource Include="Assets\angle-right.png" />
+    <Resource Include="Assets\close.png" />
+    <Resource Include="Assets\copy.png" />
+    <Resource Include="Assets\create.png" />
+    <Resource Include="Assets\delete.png" />
+    <Resource Include="Assets\edit.png" />
+    <Resource Include="Assets\house-chimney.png" />
+    <Resource Include="Assets\maximize.png" />
+    <Resource Include="Assets\minimize.png" />
+    <Resource Include="Assets\paste.png" />
+    <Resource Include="Assets\refresh.png" />
+    <Resource Include="Assets\rename.png" />
+    <Resource Include="Assets\sort.png" />
   </ItemGroup>
 
 </Project>
