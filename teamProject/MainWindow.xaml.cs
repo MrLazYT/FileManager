@@ -26,6 +26,21 @@ namespace teamProject
             UpdateItems();
         }
 
+        private void MinimizeButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.WindowState = WindowState.Minimized;
+        }
+
+        private void CloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+
+        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            this.DragMove();
+        }
+
         private void GetDefaultPath()
         {
             string username = Environment.UserName;
@@ -34,7 +49,6 @@ namespace teamProject
             openedDirectory = model.Path;
         }
        
-
         private void ItemGrid_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             if (e.ClickCount == 2)
@@ -96,6 +110,7 @@ namespace teamProject
             
             NextBtn.IsEnabled = model.CanGoForward();
         }
+
         private Task UpdateItemsByTypeAsync(string[] items, string type = "directory")
         {
             return Task.Run(() =>
@@ -144,7 +159,6 @@ namespace teamProject
                     {
                         size += new FileInfo(filePath).Length;
                     }
-
 
                 }
                 catch { }
@@ -241,6 +255,7 @@ namespace teamProject
                 SearchDirectories(model.Path, phrase); 
             }
         }
+
         private async void SearchDirectories(string rootPath, string phrase)
         {
             List<string> foundItems = new List<string>();
@@ -248,7 +263,6 @@ namespace teamProject
             {
                 try
                 {
-
                     foundItems.AddRange(Directory.EnumerateFileSystemEntries(rootPath, "*.*", SearchOption.AllDirectories)
                                                  .Where(path => Path.GetFileName(path).Contains(phrase, StringComparison.OrdinalIgnoreCase)));
                 }
@@ -261,6 +275,7 @@ namespace teamProject
             UpdateItemsByTypeAsync(foundItems.ToArray());
            
         }
+
         private void CreateFile_Click(object sender, RoutedEventArgs e)
         {
             var saveFileDialog = new SaveFileDialog();
@@ -292,6 +307,7 @@ namespace teamProject
                 }
             }
         }
+
         private void Copy_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -311,10 +327,9 @@ namespace teamProject
             {
                 MessageBox.Show($"Помилка копіювання файлу: {ex.Message}", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-
             pasteItem.IsEnabled = true;
-            
         }
+
         private void Paste_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -346,8 +361,6 @@ namespace teamProject
                             Directory.CreateDirectory(uniqueDirectoryName);
                             CopyDirectory(fileToPaste, destinationPath);
                         }
-
-
                     }
                 }
                 UpdateItems();
@@ -377,7 +390,6 @@ namespace teamProject
             {
                 var tempPath = Path.Combine(destinationDirectoryName, subDir.Name);
                 CopyDirectory(subDir.FullName, tempPath);
-
             }
         }
         private void Delete_Click(object sender, RoutedEventArgs e)
@@ -401,12 +413,12 @@ namespace teamProject
                     UpdateItems();
                 }
             }
-
             catch (Exception ex)
             {
                 MessageBox.Show($"Помилка видалення файлу: {ex.Message}", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
         private void Rename_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -461,12 +473,27 @@ namespace teamProject
             }
             return newName;
         }
+
         private void Update_Click(object sender, RoutedEventArgs e)
         {
             UpdateItems();
             Directory.SetCurrentDirectory(model.Path);
             openedDirectory = Directory.GetCurrentDirectory();
             pasteItem.IsEnabled = false;
+        }
+
+        private void UpDate_btn(object sender, RoutedEventArgs e)
+        {
+            UpdateItems();
+            pasteItem.IsEnabled = false;
+        }
+
+        private void Home_btn(object sender, RoutedEventArgs e)
+        {
+        }
+
+        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
         }
 
         private void MyFolder_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -627,7 +654,6 @@ namespace teamProject
                 Size = Size / 1024;
                 unitIndex++;
             }
-
             SizeString = $"{Size} {Units[unitIndex]}";
         }
     }
