@@ -111,25 +111,33 @@ namespace teamProject
             {
                 long size = 0;
 
+                DirectoryInfo dirInfo = new DirectoryInfo(curDirectoryPath);
+
                 if (ItemsListBox.Items.Contains(dItem))
                 {
                     try
                     {
-                        string[] directories = Directory.GetDirectories(curDirectoryPath);
-                        string[] files = Directory.GetFiles(curDirectoryPath);
-
-                        foreach (string directoryPath in directories)
-                        {
-                            size += await GetItemsSizeAsync(directoryPath, dItem);
-                        }
-
-                        foreach (string filePath in files)
-                        {
-                            size += new FileInfo(filePath).Length;
-                        }
-
+                        size = dirInfo.EnumerateFiles("*", SearchOption.AllDirectories).Sum(file => file.Length);
                     }
-                    catch { }
+                    catch (UnauthorizedAccessException)
+                    {
+                        try
+                        {
+                            string[] directories = Directory.GetDirectories(curDirectoryPath);
+                            string[] files = Directory.GetFiles(curDirectoryPath);
+
+                            foreach (string directoryPath in directories)
+                            {
+                                size += await GetItemsSizeAsync(directoryPath, dItem);
+                            }
+
+                            foreach (string filePath in files)
+                            {
+                                size += new FileInfo(filePath).Length;
+                            }
+                        }
+                        catch { }
+                    }
                 }
 
                 return size;
@@ -652,7 +660,7 @@ namespace teamProject
     {
         private List<string> Units = new List<string>()
         {
-            "B", "KB", "MB", "GB"
+            "Байт", "КБ", "МБ", "ГБ"
         };
 
         public string Name { get; set; }
