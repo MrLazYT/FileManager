@@ -75,7 +75,7 @@ namespace teamProject
 
             await UpdateItemsByTypeAsync(directories);
             await UpdateItemsByTypeAsync(files, "file");
-            UpdateDirectoriesSize();
+            //UpdateDirectoriesSize();
             UpdateButtonState();
 
             ItemsListBox.ItemsSource = model.Items;
@@ -536,6 +536,8 @@ namespace teamProject
                 }
             }
         }
+
+        
     }
 
     [AddINotifyPropertyChangedInterface]
