@@ -90,7 +90,7 @@ namespace teamProject
                     if (dItem is DDirectory)
                     {
                         string itemPath = Path.Combine(model.Path, dItem.Name);
-                        long itemSize = await GetItemsSizeAsync(itemPath);
+                        long itemSize = await GetItemsSizeAsync(itemPath, dItem);
                         dItem.UpdateSize(itemSize);
                     }
                 }
@@ -139,29 +139,32 @@ namespace teamProject
             });
         }
 
-        private Task<long> GetItemsSizeAsync(string curDirectoryPath)
+        private Task<long> GetItemsSizeAsync(string curDirectoryPath, DItem dItem)
         {
             return Task.Run(async () =>
             {
                 long size = 0;
 
-                try
+                if (ItemsListBox.Items.Contains(dItem))
                 {
-                    string[] directories = Directory.GetDirectories(curDirectoryPath);
-                    string[] files = Directory.GetFiles(curDirectoryPath);
-
-                    foreach (string directoryPath in directories)
+                    try
                     {
-                        size += await GetItemsSizeAsync(directoryPath);
-                    }
+                        string[] directories = Directory.GetDirectories(curDirectoryPath);
+                        string[] files = Directory.GetFiles(curDirectoryPath);
 
-                    foreach (string filePath in files)
-                    {
-                        size += new FileInfo(filePath).Length;
-                    }
+                        foreach (string directoryPath in directories)
+                        {
+                            size += await GetItemsSizeAsync(directoryPath, dItem);
+                        }
 
+                        foreach (string filePath in files)
+                        {
+                            size += new FileInfo(filePath).Length;
+                        }
+
+                    }
+                    catch { }
                 }
-                catch { }
 
                 return size;
             });
