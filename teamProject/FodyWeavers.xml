@@ -1,3 +1,9 @@
 ﻿<Weavers xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="FodyWeavers.xsd">
-  <PropertyChanged />
+	<PropertyChanged>
+		<Project Sdk="Microsoft.NET.Sdk">
+			<ItemGroup>
+				<PackageReference Include="PropertyChanged.Fody" Version="3.3.1" PrivateAssets="All" />
+			</ItemGroup>
+		</Project>
+	</PropertyChanged>
 </Weavers>
