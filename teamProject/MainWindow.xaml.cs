@@ -16,6 +16,7 @@ namespace teamProject
         private Model model;
         private string openedDirectory;
         private string _soursDirectory;
+        private string homeDirectory;   
         public MainWindow()
         {
             InitializeComponent();
@@ -44,9 +45,9 @@ namespace teamProject
         private void GetDefaultPath()
         {
             string username = Environment.UserName;
-
             model.Path = Directory.GetCurrentDirectory();
             openedDirectory = model.Path;
+            homeDirectory = model.Path; ;
         }
        
         private void ItemGrid_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -113,6 +114,7 @@ namespace teamProject
 
         private Task UpdateItemsByTypeAsync(string[] items, string type = "directory")
         {
+            model.ClearItems();
             return Task.Run(() =>
             {
                 foreach (string itemPath in items)
@@ -246,7 +248,7 @@ namespace teamProject
             }
         }
 
-        private void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
+       /* private void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             string phrase = SearchTextBox.Text.Trim();
             if (string.IsNullOrEmpty(phrase))
@@ -255,9 +257,9 @@ namespace teamProject
             }
             else
             {
-                SearchDirectories(model.Path, phrase); 
+                SearchDirectories(model.Path, phrase);
             }
-        }
+        }*/
 
         private async void SearchDirectories(string rootPath, string phrase)
         {
@@ -493,7 +495,12 @@ namespace teamProject
 
         private void Home_btn(object sender, RoutedEventArgs e)
         {
+            model.Path = homeDirectory;
+            Directory.SetCurrentDirectory(model.Path);
+            openedDirectory = Directory.GetCurrentDirectory();
+            UpdateItems();
         }
+
 
         private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
@@ -537,7 +544,18 @@ namespace teamProject
             }
         }
 
-        
+        private void SearchTextBox_TextChanged_1(object sender, TextChangedEventArgs e)
+        {
+            string phrase = SearchTextBox.Text.Trim();
+            if (string.IsNullOrEmpty(phrase))
+            {
+                UpdateItems();
+            }
+            else
+            {
+                SearchDirectories(model.Path, phrase);
+            }
+        }
     }
 
     [AddINotifyPropertyChangedInterface]
