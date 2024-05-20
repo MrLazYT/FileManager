@@ -16,6 +16,7 @@ namespace teamProject
         private Model model;
         private string openedDirectory;
         private string _soursDirectory;
+        private string homeDirectory;   
         public MainWindow()
         {
             InitializeComponent();
@@ -46,9 +47,9 @@ namespace teamProject
         private void GetDefaultPath()
         {
             string username = Environment.UserName;
-
             model.Path = Directory.GetCurrentDirectory();
             openedDirectory = model.Path;
+            homeDirectory = model.Path; ;
         }
        
         private void ItemGrid_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -103,7 +104,7 @@ namespace teamProject
                 MessageBox.Show($"Непередбачена помилка: {ex.Message}", "Помилка розрахунку розміру папки.", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-
+        
         private Task<long> GetItemsSizeAsync(string curDirectoryPath, DItem dItem)
         {
             return Task.Run(async () =>
@@ -249,22 +250,6 @@ namespace teamProject
                     
                     MessageBox.Show("Цей шлях більше не існує.", "Помилка", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
-            }
-        }
-
-        private void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            model.ClearItems();
-
-            string phrase = SearchTextBox.Text.Trim();
-            
-            if (string.IsNullOrEmpty(phrase))
-            {
-                UpdateItems();
-            }
-            else
-            {
-                SearchDirectories(model.Path, phrase);
             }
         }
 
@@ -521,7 +506,12 @@ namespace teamProject
 
         private void Home_btn(object sender, RoutedEventArgs e)
         {
+            model.Path = homeDirectory;
+            Directory.SetCurrentDirectory(model.Path);
+            openedDirectory = Directory.GetCurrentDirectory();
+            UpdateItems();
         }
+
 
         private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
