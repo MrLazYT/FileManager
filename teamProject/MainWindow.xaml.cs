@@ -55,15 +55,19 @@ namespace teamProject
         {
             if (e.ClickCount == 2)
             {
-                DItem dObject = (DItem)ItemsListBox.SelectedItem;
+                DItem dItem = (DItem)ItemsListBox.SelectedItem;
 
-                if (dObject is DDirectory)
+                if (dItem is DDrive)
                 {
-                    OpenDirectory(dObject);
+                    OpenDrive(dItem);
                 }
-                else if (dObject is DFile)
+                else if (dItem is DDirectory)
                 {
-                    OpenFile(dObject);
+                    OpenDirectory(dItem);
+                }
+                else if (dItem is DFile)
+                {
+                    OpenFile(dItem);
                 }
             }
         }
@@ -182,9 +186,20 @@ namespace teamProject
             NextBtn.IsEnabled = model.CanGoForward();
         }
 
-        private void OpenFile(DItem dObject)
+        private void OpenDrive(DItem dItem)
         {
-            string filePath = Path.Combine(model.Path, dObject.Name);
+            model.PushBackPath(model.Path);
+            model.Path = ((DDrive)dItem).Path;
+            Directory.SetCurrentDirectory(model.Path);
+            openedDirectory = Directory.GetCurrentDirectory();
+            model.forwardPathHistory.Clear();
+
+            UpdateItems();
+        }
+
+        private void OpenFile(DItem dItem)
+        {
+            string filePath = Path.Combine(model.Path, dItem.Name);
             Process process = new Process();
             ProcessStartInfo startInfo = new ProcessStartInfo();
 
@@ -195,12 +210,12 @@ namespace teamProject
             process.Start();
         }
 
-        private void OpenDirectory(DItem dObject)
+        private void OpenDirectory(DItem dItem)
         {
             try
             {
                 model.PushBackPath(model.Path);
-                model.Path = Path.Combine(model.Path, dObject.Name);
+                model.Path = Path.Combine(model.Path, dItem.Name);
                 Directory.SetCurrentDirectory(model.Path);
                 openedDirectory = Directory.GetCurrentDirectory();
                 model.forwardPathHistory.Clear();
@@ -541,9 +556,27 @@ namespace teamProject
             
             if (e.ClickCount >= 2 && model.Path != selectedDir.Path)
             {
-                model.Path = selectedDir.Path;
+                if (selectedDir.Path == "<=Discs=>")
+                {
+                    DriveInfo[] drives = DriveInfo.GetDrives();
+                    List<DDrive> dDrives = new List<DDrive>();
 
-                UpdateItems();
+                    foreach (DriveInfo drive in drives)
+                    {
+                        DDrive dDrive = new DDrive(drive);
+                        
+                        dDrives.Add(dDrive);
+                    }
+
+                    ItemsListBox.ItemsSource = dDrives;
+                    model.Path = "Диски";
+                }
+                else
+                {
+                    model.Path = selectedDir.Path;
+
+                    UpdateItems();
+                }
             }
         }
 
@@ -551,7 +584,7 @@ namespace teamProject
         {
         }
 
-        private void PathTextBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        private void PathTextBox_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
             {
@@ -592,6 +625,7 @@ namespace teamProject
             items = new ObservableCollection<DItem>();
             myFolders = new ObservableCollection<DDirectory>()
             {
+                new DDirectory("Диски", "<=Discs=>"),
                 new DDirectory("Робочий стіл", Environment.GetFolderPath(Environment.SpecialFolder.Desktop)),
                 new DDirectory("Завантаження", @$"C:\Users\{Environment.UserName}\Downloads"),
                 new DDirectory("Документи", Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)),
@@ -702,6 +736,24 @@ namespace teamProject
             }
 
             SizeString = $"{Size} {Units[unitIndex]}";
+        }
+    }
+
+    [AddINotifyPropertyChangedInterface]
+    public class DDrive : DItem
+    {
+        public string Path { get; set; }
+        public double TotalSpace { get; set; }
+        public double FreeSpace { get; set; }
+        public double PercentSize { get; set; }
+
+        public DDrive(DriveInfo driveInfo)
+        {
+            Name = $"Локальний диск ({driveInfo.Name.Substring(0, driveInfo.Name.Length - 1)})";
+            Path = driveInfo.Name;
+            TotalSpace = driveInfo.TotalSize;
+            FreeSpace = driveInfo.AvailableFreeSpace;
+            PercentSize = 100 - ((FreeSpace / TotalSpace) * 100);
         }
     }
 
