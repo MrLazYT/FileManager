@@ -4,6 +4,7 @@ using PropertyChanged;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -29,6 +30,14 @@ namespace teamProject
             UpdateItems();
         }
 
+        private void GetDefaultPath()
+        {
+            string username = Environment.UserName;
+            model.Path = Directory.GetCurrentDirectory();
+            openedDirectory = model.Path;
+            homeDirectory = model.Path; ;
+        }
+
         private void MinimizeButton_Click(object sender, RoutedEventArgs e)
         {
             this.WindowState = WindowState.Minimized;
@@ -42,14 +51,6 @@ namespace teamProject
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             this.DragMove();
-        }
-
-        private void GetDefaultPath()
-        {
-            string username = Environment.UserName;
-            model.Path = Directory.GetCurrentDirectory();
-            openedDirectory = model.Path;
-            homeDirectory = model.Path; ;
         }
        
         private void ItemGrid_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -73,6 +74,43 @@ namespace teamProject
             }
         }
 
+        private void OpenDrive(DItem dItem)
+        {
+            model.PushBackPath(model.Path);
+            model.Path = ((DDrive)dItem).Path;
+            Directory.SetCurrentDirectory(model.Path);
+            openedDirectory = Directory.GetCurrentDirectory();
+            model.forwardPathHistory.Clear();
+
+            UpdateItems();
+        }
+
+        private void OpenDirectory(DItem dItem)
+        {
+            try
+            {
+                model.PushBackPath(model.Path);
+                model.Path = Path.Combine(model.Path, dItem.Name);
+                Directory.SetCurrentDirectory(model.Path);
+                openedDirectory = Directory.GetCurrentDirectory();
+                model.forwardPathHistory.Clear();
+
+                UpdateItems();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                MessageBox.Show("Ви не маєте доступу до цієї папки.", "Неавторизований доступ", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            catch (DirectoryNotFoundException)
+            {
+                MessageBox.Show("Не можливо знайти шлях до папки.", "Невірне розташування", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Непередбачена помилка: {ex.Message}", "Помилка шляху папки");
+            }
+        }
+
         private async void UpdateItems()
         {
             model.ClearItems();
@@ -88,6 +126,37 @@ namespace teamProject
             ItemsListBox.ItemsSource = model.Items;
         }
 
+        private Task UpdateItemsByTypeAsync(string[] items)
+        {
+            return Task.Run(async () =>
+            {
+                foreach (string itemPath in items)
+                {
+                    string itemName = Path.GetFileName(itemPath);
+                    DateTime itemDate = Directory.GetLastWriteTime($"{itemPath}");
+                    DItem dItem = new DItem();
+
+                    if (Directory.Exists(itemPath))
+                    {
+                        dItem = new DDirectory(itemName, itemDate);
+
+                        await GetItemsSizeAsync(itemPath, dItem);
+                    }
+                    else if (File.Exists(itemPath))
+                    {
+                        long itemSize = new FileInfo(itemPath).Length;
+
+                        dItem = new DFile(itemName, itemDate, itemSize);
+                    }
+
+                    Dispatcher.Invoke(() =>
+                    {
+                        model.AddItem(dItem);
+                    });
+                }
+            });
+        }
+
         private async void UpdateItemsSize()
         {
             try
@@ -98,7 +167,7 @@ namespace teamProject
                     {
                         string itemPath = Path.Combine(model.Path, dItem.Name);
                         long itemSize = await GetItemsSizeAsync(itemPath, dItem);
-                        dItem.UpdateSize(itemSize);
+                        dItem.UpdateItemSize(itemSize);
                     }
                 }
             }
@@ -108,7 +177,7 @@ namespace teamProject
                 MessageBox.Show($"Непередбачена помилка: {ex.Message}", "Помилка розрахунку розміру папки.", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-        
+
         private Task<long> GetItemsSizeAsync(string curDirectoryPath, DItem dItem)
         {
             return Task.Run(async () =>
@@ -148,54 +217,12 @@ namespace teamProject
             });
         }
 
-        private Task UpdateItemsByTypeAsync(string[] items)
-        {
-            return Task.Run(async () =>
-            {
-                foreach (string itemPath in items)
-                {
-                    string itemName = Path.GetFileName(itemPath);
-                    DateTime itemDate = Directory.GetLastWriteTime($"{itemPath}");
-                    DItem dItem = new DItem();
-
-                    if (Directory.Exists(itemPath))
-                    {
-                        dItem = new DDirectory(itemName, itemDate);
-
-                        await GetItemsSizeAsync(itemPath, dItem);
-                    }
-                    else if (File.Exists(itemPath))
-                    {
-                        long itemSize = new FileInfo(itemPath).Length;
-
-                        dItem = new DFile(itemName, itemDate, itemSize);
-                    }
-
-                    Dispatcher.Invoke(() =>
-                    {
-                        model.AddItem(dItem);
-                    });
-                }
-            });
-        }
-
         private void UpdateButtonState()
         {
             DirectoryInfo parentDir = Directory.GetParent(model.Path)!;
-            
+
             BackBtn.IsEnabled = (parentDir != null);
             NextBtn.IsEnabled = model.CanGoForward();
-        }
-
-        private void OpenDrive(DItem dItem)
-        {
-            model.PushBackPath(model.Path);
-            model.Path = ((DDrive)dItem).Path;
-            Directory.SetCurrentDirectory(model.Path);
-            openedDirectory = Directory.GetCurrentDirectory();
-            model.forwardPathHistory.Clear();
-
-            UpdateItems();
         }
 
         private void OpenFile(DItem dItem)
@@ -207,34 +234,8 @@ namespace teamProject
             startInfo.UseShellExecute = true;
             startInfo.FileName = filePath;
             process.StartInfo = startInfo;
-            
+
             process.Start();
-        }
-
-        private void OpenDirectory(DItem dItem)
-        {
-            try
-            {
-                model.PushBackPath(model.Path);
-                model.Path = Path.Combine(model.Path, dItem.Name);
-                Directory.SetCurrentDirectory(model.Path);
-                openedDirectory = Directory.GetCurrentDirectory();
-                model.forwardPathHistory.Clear();
-
-                UpdateItems();
-            }
-            catch (UnauthorizedAccessException)
-            {
-                MessageBox.Show("Ви не маєте доступу до цієї папки.", "Неавторизований доступ", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-            catch (DirectoryNotFoundException)
-            {
-                MessageBox.Show("Не можливо знайти шлях до папки.", "Невірне розташування", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Непередбачена помилка: {ex.Message}", "Помилка шляху папки");
-            }
         }
         
         private void BackBtn_Click(object sender, RoutedEventArgs e)
@@ -403,6 +404,27 @@ namespace teamProject
             }
         }
 
+        private string GetUniqueFileName(string fileName)
+        {
+            string directoryPath = Directory.GetCurrentDirectory();
+            string extension = Path.GetExtension(fileName);
+            string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(fileName);
+            string newName = fileName;
+
+            if (File.Exists(Path.Combine(directoryPath, newName)))
+            {
+                int count = 2;
+
+                while (File.Exists(Path.Combine(directoryPath, newName)))
+                {
+                    newName = $"{fileNameWithoutExtension}({count}){extension}";
+                    count++;
+                }
+            }
+
+            return newName;
+        }
+
         private void CopyDirectory(string sourceDirectoryName, string destinationDirectoryName)
         {
             var directory = new DirectoryInfo(sourceDirectoryName);
@@ -486,30 +508,9 @@ namespace teamProject
         //------------------------------------------------------------
         private void Mov_Click(object sender, RoutedEventArgs e)
         {
-            // код Семена
+            // код Семена || P.S. Вже не Семена
         }
         //------------------------------------------------------------
-        
-        private string GetUniqueFileName(string fileName)
-        {
-            string directoryPath = Directory.GetCurrentDirectory();
-            string extension = Path.GetExtension(fileName);
-            string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(fileName);
-            string newName = fileName;
-
-            if (File.Exists(Path.Combine(directoryPath, newName)))
-            {
-                int count = 2;
-
-                while (File.Exists(Path.Combine(directoryPath, newName)))
-                {
-                    newName = $"{fileNameWithoutExtension}({count}){extension}";
-                    count++;
-                }
-            }
-
-            return newName;
-        }
 
         private void Update_Click(object sender, RoutedEventArgs e)
         {
@@ -532,15 +533,11 @@ namespace teamProject
             model.Path = homeDirectory;
             Directory.SetCurrentDirectory(model.Path);
             openedDirectory = Directory.GetCurrentDirectory();
+
             UpdateItems();
         }
 
-
-        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-        }
-
-        private void MyFolder_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void MyFolder_MouseDown(object sender, MouseButtonEventArgs e)
         {
             DDirectory selectedDir = (DDirectory)FolderListBox.SelectedItem;
             
@@ -570,10 +567,6 @@ namespace teamProject
             }
         }
 
-        private void FolderListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-        }
-
         private void PathTextBox_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
@@ -594,6 +587,18 @@ namespace teamProject
                     MessageBox.Show($"Непердбачена помилка шляху: {ex.Message}", "Помилка шляху", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
+        }
+
+        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+        }
+
+        private void FolderListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+        }
+
+        private void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
         }
     }
 
@@ -694,11 +699,11 @@ namespace teamProject
     {
         private List<string> Units = new List<string>()
         {
-            "Байт", "КБ", "МБ", "ГБ"
+            "Байт", "КБ", "МБ", "ГБ", "ТБ"
         };
 
         public string Name { get; set; }
-        public DateTime Date { get; set; }
+        public string Date { get; set; }
         public long Size { get; set; }
         public string SizeString { get; set; } = "Розрахунок...";
 
@@ -710,22 +715,27 @@ namespace teamProject
         public DItem(string name, DateTime date)
         {
             Name = name;
-            Date = date;
+            Date = date.ToShortDateString();
         }
 
-        public void UpdateSize(long size)
+        public void UpdateItemSize(long size)
+        {
+            Size = size;
+            SizeString = UpdateSize(Size);
+        }
+
+        public string UpdateSize(long size)
         {
             int unitIndex = 0;
 
-            Size = size;
-
-            while (Size >= 1024)
+            while (size >= 1024)
             {
-                Size = Size / 1024;
+                size = size / 1024;
                 unitIndex++;
             }
 
-            SizeString = $"{Size} {Units[unitIndex]}";
+            return $"{size} {Units[unitIndex]}";
+
         }
     }
 
@@ -733,8 +743,10 @@ namespace teamProject
     public class DDrive : DItem
     {
         public string Path { get; set; }
-        public double TotalSpace { get; set; }
-        public double FreeSpace { get; set; }
+        public long TotalSpace { get; set; }
+        public string TotalSpaceString { get; set; } = "";
+        public long FreeSpace { get; set; }
+        public string FreeSpaceString { get; set; } = "";
         public double PercentSize { get; set; }
 
         public DDrive(DriveInfo driveInfo)
@@ -744,6 +756,11 @@ namespace teamProject
             TotalSpace = driveInfo.TotalSize;
             FreeSpace = driveInfo.AvailableFreeSpace;
             PercentSize = 100 - ((FreeSpace / TotalSpace) * 100);
+            
+            SizeString = "";
+            TotalSpaceString = UpdateSize(TotalSpace);
+            FreeSpaceString = UpdateSize(FreeSpace);
+            Date = $"{FreeSpaceString} вільно з {TotalSpaceString}";
         }
     }
 
@@ -769,7 +786,7 @@ namespace teamProject
     {   
         public DFile(string name, DateTime date, long size) : base(name, date)
         {
-            UpdateSize(size);
+            UpdateItemSize(size);
         }
     }
 }
