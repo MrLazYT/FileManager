@@ -4,7 +4,6 @@ using PropertyChanged;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -18,6 +17,7 @@ namespace teamProject
         private string openedDirectory;
         private string _soursDirectory;
         private string homeDirectory;   
+        
         public MainWindow()
         {
             InitializeComponent();
@@ -25,6 +25,7 @@ namespace teamProject
             this.DataContext = model;
             openedDirectory = null!;
             _soursDirectory = null!;
+            homeDirectory = null!;
 
             GetDefaultPath();
             UpdateItems();
@@ -53,7 +54,7 @@ namespace teamProject
             this.DragMove();
         }
        
-        private void ItemGrid_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void ItemGrid_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ClickCount == 2)
             {
@@ -120,10 +121,12 @@ namespace teamProject
 
             await UpdateItemsByTypeAsync(directories);
             await UpdateItemsByTypeAsync(files);
+            
+            ItemsListBox.ItemsSource = model.Items;
+
             UpdateItemsSize();
             UpdateButtonState();
 
-            ItemsListBox.ItemsSource = model.Items;
         }
 
         private Task UpdateItemsByTypeAsync(string[] items)
@@ -132,49 +135,79 @@ namespace teamProject
             {
                 foreach (string itemPath in items)
                 {
-                    string itemName = Path.GetFileName(itemPath);
-                    DateTime itemDate = Directory.GetLastWriteTime($"{itemPath}");
-                    DItem dItem = new DItem();
-
-                    if (Directory.Exists(itemPath))
-                    {
-                        dItem = new DDirectory(itemName, itemDate);
-
-                        await GetItemsSizeAsync(itemPath, dItem);
-                    }
-                    else if (File.Exists(itemPath))
-                    {
-                        long itemSize = new FileInfo(itemPath).Length;
-
-                        dItem = new DFile(itemName, itemDate, itemSize);
-                    }
-
-                    Dispatcher.Invoke(() =>
-                    {
-                        model.AddItem(dItem);
-                    });
+                    await UpdateItemByTypeAsync(itemPath);
                 }
             });
         }
 
-        private async void UpdateItemsSize()
+        private Task UpdateItemByTypeAsync(string itemPath)
+        {
+            return Task.Run(async () =>
+            {
+                string itemName = Path.GetFileName(itemPath);
+                List<string> vanishedItems = new List<string>()
+                { "$recycle.bin", "$windows.~ws", "$winreagent", "config.msi", "documents and settings",
+                  "system volume information", "recovery", "msocache", "$av_asw", "boot",
+                  "dumpstack.log", "dumpstack.log.tmp", "hiberfil.sys", "pagefile.sys", "swapfile.sys", "vfcompat.dll",
+                  "bootmgr", "bootnxt", "boottel.dat", "autoexec.bat", "bootsect.bak", "config.sys", "io.sys",
+                  "msdos.sys", "wfnei" };
+
+                DateTime itemDate = Directory.GetLastWriteTime($"{itemPath}");
+                DItem dItem = new DItem();
+
+                if (Directory.Exists(itemPath) &&
+                    !vanishedItems.Contains(itemName.ToLower()))
+                {
+                    dItem = new DDirectory(itemName, itemDate);
+
+                    await GetItemsSizeAsync(itemPath, dItem);
+                }
+                else if (File.Exists(itemPath) &&
+                         !vanishedItems.Contains(itemName.ToLower()))
+                {
+                    long itemSize = new FileInfo(itemPath).Length;
+
+                    dItem = new DFile(itemName, itemDate, itemSize);
+                }
+
+                AddItem(dItem);
+            });
+        }
+
+        private void AddItem(DItem dItem)
+        {
+            if (dItem.Name != null)
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    model.AddItem(dItem);
+                });
+            }
+        }
+
+        private void UpdateItemsSize()
         {
             try
             {
-                foreach (DItem dItem in ItemsListBox.Items)
+                foreach (DItem dItem in model.Items)
                 {
-                    if (dItem is DDirectory)
-                    {
-                        string itemPath = Path.Combine(model.Path, dItem.Name);
-                        long itemSize = await GetItemsSizeAsync(itemPath, dItem);
-                        dItem.UpdateItemSize(itemSize);
-                    }
+                    UpdateItemSize(dItem);
                 }
             }
-            catch (InvalidOperationException) { }
+            catch (InvalidOperationException) {}
             catch (Exception ex)
             {
                 MessageBox.Show($"Непередбачена помилка: {ex.Message}", "Помилка розрахунку розміру папки.", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private async void UpdateItemSize(DItem dItem)
+        {
+            if (dItem is DDirectory)
+            {
+                string itemPath = Path.Combine(model.Path, dItem.Name);
+                long itemSize = await GetItemsSizeAsync(itemPath, dItem);
+                dItem.UpdateItemSize(itemSize);
             }
         }
 
@@ -183,7 +216,6 @@ namespace teamProject
             return Task.Run(async () =>
             {
                 long size = 0;
-
                 DirectoryInfo dirInfo = new DirectoryInfo(curDirectoryPath);
 
                 if (ItemsListBox.Items.Contains(dItem))
@@ -201,7 +233,7 @@ namespace teamProject
 
                             foreach (string directoryPath in directories)
                             {
-                                size += await GetItemsSizeAsync(directoryPath, dItem);
+                                size += await GetItemsSize(directoryPath, dItem);
                             }
 
                             foreach (string filePath in files)
@@ -215,6 +247,38 @@ namespace teamProject
 
                 return size;
             });
+        }
+
+        private async Task<long> GetItemsSize(string curDirectoryPath, DItem dItem)
+        {
+            long size = 0;
+            DirectoryInfo dirInfo = new DirectoryInfo(curDirectoryPath);
+
+            try
+            {
+                size = dirInfo.EnumerateFiles("*", SearchOption.AllDirectories).Sum(file => file.Length);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                try
+                {
+                    string[] directories = Directory.GetDirectories(curDirectoryPath);
+                    string[] files = Directory.GetFiles(curDirectoryPath);
+
+                    foreach (string directoryPath in directories)
+                    {
+                        size += await GetItemsSize(directoryPath, dItem);
+                    }
+
+                    foreach (string filePath in files)
+                    {
+                        size += new FileInfo(filePath).Length;
+                    }
+                }
+                catch { }
+            }
+
+            return size;
         }
 
         private void UpdateButtonState()
@@ -297,7 +361,6 @@ namespace teamProject
             });
 
             await UpdateItemsByTypeAsync(foundItems.ToArray());
-           
         }
 
         private void CreateFile_Click(object sender, RoutedEventArgs e)
@@ -710,6 +773,7 @@ namespace teamProject
         public DItem()
         {
             Name = null!;
+            Date = null!;
         }
 
         public DItem(string name, DateTime date)
