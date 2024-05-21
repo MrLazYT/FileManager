@@ -17,7 +17,8 @@ namespace teamProject
         private Model model;
         private string openedDirectory;
         private string _soursDirectory;
-        private string homeDirectory;   
+        private string homeDirectory;
+        private bool isMove = false;
         public MainWindow()
         {
             InitializeComponent();
@@ -369,6 +370,13 @@ namespace teamProject
 
                 foreach (var fileToPaste in fileArray)
                 {
+                    
+                    if (PathTextBox.Text.Contains(Path.GetFileName(fileToPaste)))
+                    {
+                        MessageBox.Show("Не можливо вставити папку саму в себе");
+                        continue;
+                    }
+
                     if (File.Exists(fileToPaste))
                     {
                         var fileName = Path.GetFileName(fileToPaste);
@@ -376,6 +384,10 @@ namespace teamProject
                         var uniqueFileName = GetUniqueFileName(fileName);
 
                         File.Copy(fileToPaste, uniqueFileName);
+                        if (isMove)
+                        {
+                            File.Delete(fileToPaste);
+                        }
                     }
                     else if (Directory.Exists(fileToPaste))
                     {
@@ -392,6 +404,10 @@ namespace teamProject
                             Directory.CreateDirectory(uniqueDirectoryName);
 
                             CopyDirectory(fileToPaste, destinationPath);
+                            if (isMove)
+                            {
+                                Directory.Delete(fileToPaste, true);
+                            }
                         }
                     }
                 }
@@ -403,6 +419,7 @@ namespace teamProject
                 MessageBox.Show($"Помилка вставки файлу: {ex.Message}", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+        
 
         private string GetUniqueFileName(string fileName)
         {
@@ -427,6 +444,7 @@ namespace teamProject
 
         private void CopyDirectory(string sourceDirectoryName, string destinationDirectoryName)
         {
+
             var directory = new DirectoryInfo(sourceDirectoryName);
             var dirs = directory.GetDirectories();
             var files = directory.GetFiles();
@@ -496,6 +514,10 @@ namespace teamProject
                     var newFilePath = Path.Combine(openedDirectory, newFileName);
 
                     File.Move(oldFilePath, newFilePath);
+                    if (isMove)
+                    {
+                        Delete_Click(sender, e);
+                    }
                     UpdateItems();
                 }
             }
@@ -505,12 +527,12 @@ namespace teamProject
             }
         }
         
-        //------------------------------------------------------------
         private void Mov_Click(object sender, RoutedEventArgs e)
         {
+            isMove = true;
+            Copy_Click(sender, e);
             // код Семена || P.S. Вже не Семена
         }
-        //------------------------------------------------------------
 
         private void Update_Click(object sender, RoutedEventArgs e)
         {
