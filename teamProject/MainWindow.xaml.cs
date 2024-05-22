@@ -114,19 +114,41 @@ namespace teamProject
 
         private async void UpdateItems()
         {
+            if (model.Path == "Диски")
+            {
+                UpdateDrives();
+            }
+            else
+            {
+                model.ClearItems();
+
+                string[] directories = Directory.GetDirectories(model.Path);
+                string[] files = Directory.GetFiles(model.Path);
+
+                await UpdateItemsByTypeAsync(directories);
+                await UpdateItemsByTypeAsync(files);
+
+                ItemsListBox.ItemsSource = model.Items;
+
+                UpdateItemsSize();
+                UpdateButtonState();
+            }
+        }
+
+        private void UpdateDrives()
+        {
             model.ClearItems();
-
-            string[] directories = Directory.GetDirectories(model.Path);
-            string[] files = Directory.GetFiles(model.Path);
-
-            await UpdateItemsByTypeAsync(directories);
-            await UpdateItemsByTypeAsync(files);
             
-            ItemsListBox.ItemsSource = model.Items;
-            
-            UpdateItemsSize();
-            UpdateButtonState();
+            DriveInfo[] drives = DriveInfo.GetDrives();
 
+            foreach (DriveInfo drive in drives)
+            {
+                DDrive dDrive = new DDrive(drive);
+
+                model.AddItem(dDrive);
+            }
+
+            model.Path = "Диски";
         }
 
         private Task UpdateItemsByTypeAsync(string[] items)
@@ -630,18 +652,7 @@ namespace teamProject
             {
                 if (selectedDir.Path == "<=Discs=>")
                 {
-                    DriveInfo[] drives = DriveInfo.GetDrives();
-                    List<DDrive> dDrives = new List<DDrive>();
-
-                    foreach (DriveInfo drive in drives)
-                    {
-                        DDrive dDrive = new DDrive(drive);
-                        
-                        dDrives.Add(dDrive);
-                    }
-
-                    ItemsListBox.ItemsSource = dDrives;
-                    model.Path = "Диски";
+                    UpdateDrives();
                 }
                 else
                 {
@@ -784,7 +795,7 @@ namespace teamProject
     {
         private List<string> Units = new List<string>()
         {
-            "Байт", "КБ", "МБ", "ГБ", "ТБ"
+            "Байт", "КБ", "МБ", "ГБ", "ТБ", "ПТ"
         };
 
         public string Name { get; set; }
@@ -811,16 +822,40 @@ namespace teamProject
 
         public string UpdateSize(long size)
         {
+            long bytes = size;
+            string remainderString = "";
+            int unitIndex = ConvertUnit(ref size);
+            long roundedBytes = size;
+
+            for (int i = 0; i < unitIndex; i++)
+            {
+                roundedBytes *= 1024;
+            }
+
+            long byteDifference = (bytes - roundedBytes);
+
+            if (byteDifference > 0)
+            {
+                ConvertUnit(ref byteDifference);
+                int remainder = (int)((100 / 1024.0) * byteDifference);
+                
+                remainderString = $",{remainder}";
+            }
+
+            return $"{size}{remainderString} {Units[unitIndex]}";
+        }
+
+        public int ConvertUnit(ref long unit)
+        {
             int unitIndex = 0;
 
-            while (size >= 1024)
+            while (unit >= 1024)
             {
-                size = size / 1024;
+                unit /= 1024;
                 unitIndex++;
             }
 
-            return $"{size} {Units[unitIndex]}";
-
+            return unitIndex;
         }
     }
 
