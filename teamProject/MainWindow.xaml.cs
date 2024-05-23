@@ -362,7 +362,7 @@ namespace teamProject
                 }
             }
         }
-
+         
         private async void SearchDirectories(string rootPath, string phrase)
         {
             List<string> foundItems = new List<string>();
