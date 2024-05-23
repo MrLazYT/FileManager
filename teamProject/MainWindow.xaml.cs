@@ -9,7 +9,6 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
 
 namespace teamProject
 {
@@ -71,14 +70,6 @@ namespace teamProject
             }
         }
 
-        private void GetDefaultPath()
-        {
-            string username = Environment.UserName;
-            model.Path = Directory.GetCurrentDirectory();
-            openedDirectory = model.Path;
-            homeDirectory = model.Path; ;
-        }
-       
         private void ItemGrid_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             if (e.ClickCount == 2)
@@ -494,9 +485,11 @@ namespace teamProject
                         var uniqueFileName = GetUniqueFileName(fileName);
 
                         File.Copy(fileToPaste, uniqueFileName);
+                        
                         if (isMove)
                         {
-                            File.Delete(fileToPaste);
+                            DeleteFile(fileToPaste);
+                            
                             isMove = false;
                         }
                     }
@@ -515,9 +508,10 @@ namespace teamProject
                             Directory.CreateDirectory(uniqueDirectoryName);
 
                             CopyDirectory(fileToPaste, destinationPath);
+                            
                             if (isMove)
                             {
-                                Directory.Delete(fileToPaste, true);
+                                DeleteDirectory(fileToPaste);
                                 isMove = false;
                             }
                         }
@@ -577,30 +571,79 @@ namespace teamProject
 
         private void Delete_Click(object sender, RoutedEventArgs e)
         {
+            var selectedItems = new List<DItem>(ItemsListBox.SelectedItems.Cast<DItem>());
+
             try
             {
-                var selectedFiles = ItemsListBox.SelectedItems;
-                var selectedItems = new List<DItem>(ItemsListBox.SelectedItems.Cast<DItem>());
-
-                foreach (DItem selectedFile in selectedItems)
-                {
-                    var filePath = Path.Combine(openedDirectory, selectedFile.Name);
-
-                    if (File.Exists(filePath))
-                    {
-                        File.Delete(filePath);
-                    }
-                    else if (Directory.Exists(filePath))
-                    {
-                        Directory.Delete(filePath, true);
-                    }
-
-                    UpdateItems();
-                }
+                TryDeleteItems(selectedItems);
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Помилка видалення файлу: {ex.Message}", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void TryDeleteItems(List<DItem> Items)
+        {
+            foreach (DItem selectedFile in Items)
+            {
+                var itemPath = Path.Combine(openedDirectory, selectedFile.Name);
+
+                if (File.Exists(itemPath))
+                {
+                    DeleteFile(itemPath);
+                }
+                else if (Directory.Exists(itemPath))
+                {
+                    DeleteDirectory(itemPath);
+
+                    string[] files = Directory.GetFiles(itemPath);
+                    string[] directories = Directory.GetDirectories(itemPath);
+
+                    if (files.Length == 0 && directories.Length == 0)
+                    {
+                        DirectoryInfo di = new DirectoryInfo(itemPath);
+                        di.Delete();
+                    }
+                }
+
+                UpdateItems();
+            }
+        }
+
+        private void DeleteFile(string filePath)
+        {
+            FileInfo fi = new FileInfo(filePath);
+
+            fi.IsReadOnly = false;
+            fi.Delete();
+        }
+
+        private void DeleteDirectory(string curDirPath)
+        {
+            string[] files = Directory.GetFiles(curDirPath);
+            string[] directories = Directory.GetDirectories(curDirPath);
+
+            foreach (string filePath in files)
+            {
+                FileInfo fi = new FileInfo(filePath);
+                fi.IsReadOnly = false;
+
+                fi.Delete();
+            }
+
+            foreach (string dirPath in directories)
+            {
+                DeleteDirectory(dirPath);
+
+                string[] dirFiles = Directory.GetFiles(dirPath);
+                string[] dirDirectories = Directory.GetDirectories(dirPath);
+
+                if (dirFiles.Length == 0 && dirDirectories.Length == 0)
+                {
+                    DirectoryInfo di = new DirectoryInfo(dirPath);
+                    di.Delete();
+                }
             }
         }
 
@@ -677,7 +720,7 @@ namespace teamProject
             {
                 if (selectedDir.Path == "<=Discs=>")
                 {
-                    Directory.SetCurrentDirectory(selectedDir.Path);
+                    Directory.SetCurrentDirectory(model.Path);
                     openedDirectory =  Directory.GetCurrentDirectory();
                     UpdateDrives();
                 }
