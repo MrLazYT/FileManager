@@ -9,6 +9,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace teamProject
 {
@@ -52,6 +53,30 @@ namespace teamProject
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             this.DragMove();
+        }
+
+        private void SearchTextBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            if (SearchTextBox.Text == "Пошук")
+            {
+                SearchTextBox.Text = "";
+            }
+        }
+
+        private void SearchTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(SearchTextBox.Text))
+            {
+                SearchTextBox.Text = "Пошук";
+            }
+        }
+
+        private void GetDefaultPath()
+        {
+            string username = Environment.UserName;
+            model.Path = Directory.GetCurrentDirectory();
+            openedDirectory = model.Path;
+            homeDirectory = model.Path; ;
         }
        
         private void ItemGrid_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)

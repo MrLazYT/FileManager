@@ -7,16 +7,17 @@
         d:DataContext="{d:DesignInstance local:Model, IsDesignTimeCreatable=True}"
         mc:Ignorable="d"
         Title="Explorer" Height="450" Width="820"
-        WindowStyle="None" AllowsTransparency="True" Background="White">
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent">
+
     <Window.Resources>
         <Style x:Key="RoundedButtonStyle" TargetType="Button">
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Border Background="{TemplateBinding Background}"
-                                    BorderBrush="{TemplateBinding BorderBrush}"
-                                    BorderThickness="{TemplateBinding BorderThickness}"
-                                    CornerRadius="3">
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="3">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                     </ControlTemplate>
@@ -28,9 +29,9 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="TextBox">
                         <Border Background="{TemplateBinding Background}"
-                                    BorderBrush="{TemplateBinding BorderBrush}"
-                                    BorderThickness="{TemplateBinding BorderThickness}"
-                                    CornerRadius="3">
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="3">
                             <ScrollViewer Margin="0" x:Name="PART_ContentHost"/>
                         </Border>
                     </ControlTemplate>
@@ -42,10 +43,10 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="ListBox">
                         <Border Background="{TemplateBinding Background}"
-                                    BorderBrush="{TemplateBinding BorderBrush}"
-                                    BorderThickness="{TemplateBinding BorderThickness}"
-                                    CornerRadius="3">
-                            <ItemsPresenter />
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="3">
+                            <ItemsPresenter/>
                         </Border>
                     </ControlTemplate>
                 </Setter.Value>
@@ -63,199 +64,205 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <!--<Style TargetType="ScrollBar">
+            <Setter Property="Background" Value="#39496A"/>
+        </Style>-->
     </Window.Resources>
-    <Border BorderBrush="Black" BorderThickness="1">
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="30"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-            <Border BorderBrush="Black" BorderThickness="0">
-                <Grid Background="#FF23283B" Height="30" Grid.Row="0" MouseLeftButtonDown="Window_MouseLeftButtonDown">
-                    <TextBlock Text="Explorer" VerticalAlignment="Center" Margin="10,0,0,0" Foreground="White"/>
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Button Width="30" Click="MinimizeButton_Click" Background="#23283B" BorderBrush="#23283B">
-                            <StackPanel Orientation="Horizontal">
-                                <Image Source="Assets/minimize.png" Width="14" Height="14"/>
-                            </StackPanel>
-                        </Button>
-                        <Button Width="30" Click="CloseButton_Click" Background="#23283B" BorderBrush="#23283B">
-                            <StackPanel Orientation="Horizontal">
-                                <Image Source="Assets/close.png" Width="18" Height="18"/>
-                            </StackPanel>
-                        </Button>
-                    </StackPanel>
-                </Grid>
-            </Border>
-            <Grid Grid.Row="1">
+    <Grid>
 
+        <Border BorderBrush="Black" BorderThickness="1" Background="#23283B">
+            <!--CornerRadius="20"-->
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="30"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Border BorderBrush="Black" BorderThickness="0">
+                    <Grid Background="#FF23283B" Height="30" Grid.Row="0" MouseLeftButtonDown="Window_MouseLeftButtonDown">
+                        <TextBlock Text="Explorer" VerticalAlignment="Center" Margin="10,0,0,0" Foreground="White"/>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <Button Width="30" Click="MinimizeButton_Click" Background="#23283B" BorderBrush="#23283B">
+                                <StackPanel Orientation="Horizontal">
+                                    <Image Source="Assets/minimize.png" Width="14" Height="14"/>
+                                </StackPanel>
+                            </Button>
+                            <Button Width="30" Click="CloseButton_Click" Background="#23283B" BorderBrush="#23283B">
+                                <StackPanel Orientation="Horizontal">
+                                    <Image Source="Assets/close.png" Width="18" Height="18"/>
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+                <Grid Grid.Row="1">
 
+                    <Grid.Background>
+                        <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                            <GradientStop Color="#23283B"/>
+                            <GradientStop Color="#23283B" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Grid.Background>
 
-                <Grid.Background>
-                    <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-                        <GradientStop Color="#23283B"/>
-                        <GradientStop Color="#23283B" Offset="1"/>
-                    </LinearGradientBrush>
-                </Grid.Background>
+                    <Button Name="BackBtn" Click="BackBtn_Click" Style="{StaticResource RoundedButtonStyle}" HorizontalContentAlignment="Stretch" Margin="10,10,0,0" FontSize="16" FontWeight="Bold" HorizontalAlignment="Left" Width="18" Height="25" VerticalAlignment="Top" Background="#39496A" BorderBrush="#39496A">
+                        <StackPanel Orientation="Horizontal">
+                            <Image Source="Assets/angle-left.png" Width="16" Height="16"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Name="NextBtn" Click="NextBtn_Click" Style="{StaticResource RoundedButtonStyle}" HorizontalContentAlignment="Center" Margin="33,10,0,0" FontWeight="Bold" FontSize="16" HorizontalAlignment="Left" Width="18" Height="25" VerticalAlignment="Top" Background="#39496A" BorderBrush="#39496A">
+                        <StackPanel Orientation="Horizontal">
+                            <Image Source="Assets/angle-right.png" Width="16" Height="16"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource RoundedButtonStyle}" HorizontalContentAlignment="Center" Margin="56,10,0,0" FontWeight="Bold" FontSize="16" Height="25" VerticalAlignment="Top" HorizontalAlignment="Left" Width="18" Click="UpDate_btn" Background="#39496A" BorderBrush="#39496A">
+                        <StackPanel Orientation="Horizontal">
+                            <Image Source="Assets/refresh.png" Width="14" Height="14"/>
+                        </StackPanel>
+                    </Button>
 
-                <Button Name="BackBtn" Click="BackBtn_Click" Style="{StaticResource RoundedButtonStyle}" HorizontalContentAlignment="Stretch" Margin="10,10,0,0" FontSize="16" FontWeight="Bold" HorizontalAlignment="Left" Width="18" Height="25" VerticalAlignment="Top" Background="#39496A" BorderBrush="#39496A">
-                    <StackPanel Orientation="Horizontal">
-                        <Image Source="Assets/angle-left.png" Width="16" Height="16"/>
-                    </StackPanel>
-                </Button>
-                <Button Name="NextBtn" Click="NextBtn_Click" Style="{StaticResource RoundedButtonStyle}" HorizontalContentAlignment="Center" Margin="33,10,0,0" FontWeight="Bold" FontSize="16" HorizontalAlignment="Left" Width="18" Height="25" VerticalAlignment="Top" Background="#39496A" BorderBrush="#39496A">
-                    <StackPanel Orientation="Horizontal">
-                        <Image Source="Assets/angle-right.png" Width="16" Height="16"/>
-                    </StackPanel>
-                </Button>
-                <Button Style="{StaticResource RoundedButtonStyle}" HorizontalContentAlignment="Center" Margin="56,10,0,0" FontWeight="Bold" FontSize="16" Height="25" VerticalAlignment="Top" HorizontalAlignment="Left" Width="18" Click="UpDate_btn" Background="#39496A" BorderBrush="#39496A">
-                    <StackPanel Orientation="Horizontal">
-                        <Image Source="Assets/refresh.png" Width="14" Height="14"/>
-                    </StackPanel>
-                </Button>
+                    <Button Style="{StaticResource RoundedButtonStyle}" HorizontalContentAlignment="Center" Margin="0,10,718,0" FontWeight="Bold" FontSize="16" HorizontalAlignment="Right" Width="21" Height="25" VerticalAlignment="Top" Click="Home_btn" Background="#39496A" BorderBrush="#39496A">
+                        <StackPanel Orientation="Horizontal">
+                            <Image Source="Assets/house-chimney.png" Width="16" Height="16"/>
+                        </StackPanel>
+                    </Button>
 
-                <Button Style="{StaticResource RoundedButtonStyle}" HorizontalContentAlignment="Center" Margin="0,10,718,0" FontWeight="Bold" FontSize="16" HorizontalAlignment="Right" Width="21" Height="25" VerticalAlignment="Top" Click="Home_btn" Background="#39496A" BorderBrush="#39496A">
-                    <StackPanel Orientation="Horizontal">
-                        <Image Source="Assets/house-chimney.png" Width="16" Height="16"/>
-                    </StackPanel>
-                </Button>
+                    <Button Style="{StaticResource RoundedButtonStyle}" HorizontalContentAlignment="Center" Margin="0,10,199,0" FontWeight="Bold" FontSize="16" HorizontalAlignment="Right" Width="21" Height="25" VerticalAlignment="Top" Click="Home_btn" Background="#39496A" BorderBrush="#39496A">
+                        <StackPanel Orientation="Horizontal">
+                            <Image Source="Assets/sort.png" Width="16" Height="16"/>
+                        </StackPanel>
+                    </Button>
 
-                <Button Style="{StaticResource RoundedButtonStyle}" HorizontalContentAlignment="Center" Margin="0,10,199,0" FontWeight="Bold" FontSize="16" HorizontalAlignment="Right" Width="21" Height="25" VerticalAlignment="Top" Click="Home_btn" Background="#39496A" BorderBrush="#39496A">
-                    <StackPanel Orientation="Horizontal">
-                        <Image Source="Assets/sort.png" Width="16" Height="16"/>
-                    </StackPanel>
-                </Button>
+                    <TextBox Name="PathTextBox"  Style="{StaticResource RoundedTextBoxStyle}" Text="{Binding Path}" KeyDown="PathTextBox_KeyDown" Margin="105,10,225,0" TextWrapping="Wrap" Height="25" VerticalAlignment="Top" TextChanged="TextBox_TextChanged" VerticalContentAlignment="Center" Background="#39496A" BorderBrush="#39496A" Foreground="#d4d4d4"/>
+                    <TextBox Name="SearchTextBox" Text="Пошук" Style="{StaticResource RoundedTextBoxStyle}" Margin="0,10,10,0" TextWrapping="Wrap" HorizontalAlignment="Right" Width="184" Height="25" VerticalAlignment="Top" VerticalContentAlignment="Center" Padding="25,0,0,0" Background="#39496A" BorderBrush="#39496A" Foreground="#d4d4d4" GotFocus="SearchTextBox_GotFocus" LostFocus="SearchTextBox_LostFocus"/>
+                    <TextBox Text="🔍︎" Style="{StaticResource RoundedTextBoxStyle}" Margin="0,10,169,0" TextWrapping="Wrap" HorizontalAlignment="Right" Width="25" Height="25" VerticalAlignment="Top" VerticalContentAlignment="Center" IsReadOnly="True" Background="#39496A" BorderBrush="#39496A" Foreground="#d4d4d4"/>
+                    <ListBox Name="FolderListBox" Style="{StaticResource RoundedListBoxStyle}" ItemsSource="{Binding MyFolders}" d:ItemsSource="{d:SampleData ItemCount=5}" SelectionChanged="FolderListBox_SelectionChanged" Margin="10,58,619,25" Background="#23283B" BorderBrush="#39496A">
 
-                <TextBox Name="PathTextBox"  Style="{StaticResource RoundedTextBoxStyle}" Text="{Binding Path}" KeyDown="PathTextBox_KeyDown" Margin="105,10,225,0" TextWrapping="Wrap" Height="25" VerticalAlignment="Top" TextChanged="TextBox_TextChanged" VerticalContentAlignment="Center" Background="#39496A" BorderBrush="#39496A" Foreground="#d4d4d4"/>
-                <TextBox Name="SearchTextBox"  Style="{StaticResource RoundedTextBoxStyle}" Margin="0,10,10,0" TextWrapping="Wrap" HorizontalAlignment="Right" Width="184" Height="25" VerticalAlignment="Top" VerticalContentAlignment="Center" Padding="25,0,0,0" Background="#39496A" BorderBrush="#39496A" Foreground="#d4d4d4" TextChanged="SearchTextBox_TextChanged"/>
-                <TextBox Text="🔍︎" Style="{StaticResource RoundedTextBoxStyle}" Margin="0,10,169,0" TextWrapping="Wrap" HorizontalAlignment="Right" Width="25" Height="25" VerticalAlignment="Top" VerticalContentAlignment="Center" IsReadOnly="True" Background="#39496A" BorderBrush="#39496A" Foreground="#d4d4d4"/>
-                <ListBox Name="FolderListBox" Style="{StaticResource RoundedListBoxStyle}" ItemsSource="{Binding MyFolders}" d:ItemsSource="{d:SampleData ItemCount=5}" SelectionChanged="FolderListBox_SelectionChanged" Margin="10,58,619,25" Background="#23283B" BorderBrush="#39496A">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid MouseDown="MyFolder_MouseDown">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="30"/>
+                                        <ColumnDefinition Width="105"/>
+                                    </Grid.ColumnDefinitions>
 
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <Grid MouseDown="MyFolder_MouseDown">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="30"/>
-                                    <ColumnDefinition Width="105"/>
-                                </Grid.ColumnDefinitions>
+                                    <Image Grid.Column="0" Width="30" Height="30">
+                                    </Image>
 
-                                <Image Grid.Column="0" Width="30" Height="30">
-                                </Image>
+                                    <TextBlock Grid.Column="1" Name="FolderName" Text="{Binding Name}" Foreground="#d4d4d4"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
 
-                                <TextBlock Grid.Column="1" Name="FolderName" Text="{Binding Name}" Foreground="#d4d4d4"/>
-                            </Grid>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
+                    <ListBox Name="ItemsListBox" ItemsSource="{Binding Items}" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="0,58,10,25" HorizontalAlignment="Right" Width="596" Background="#23283B" Foreground="#d4d4d4" BorderBrush="#23283B">
+                        <ListBox.ContextMenu>
+                            <ContextMenu Background="#39496A" BorderBrush="#39496A" Foreground="#d4d4d4">
+                                <MenuItem x:Name="createItem" Click="CreateFile_Click" Background="#39496A" BorderBrush="#39496A">
+                                    <MenuItem.Header>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Image Source="Assets/create.png" Width="16" Height="16" Margin="0,0,5,0"/>
+                                            <TextBlock Text="Створити файл"/>
+                                        </StackPanel>
+                                    </MenuItem.Header>
+                                </MenuItem>
 
-                <ListBox Name="ItemsListBox" ItemsSource="{Binding Items}" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="0,58,10,25" HorizontalAlignment="Right" Width="596" Background="#23283B" Foreground="#d4d4d4" BorderBrush="#23283B">
-                    <ListBox.ContextMenu>
-                        <ContextMenu Background="#39496A" BorderBrush="#39496A" Foreground="#d4d4d4">
-                            <MenuItem x:Name="createItem" Click="CreateFile_Click" Background="#39496A" BorderBrush="#39496A">
-                                <MenuItem.Header>
-                                    <StackPanel Orientation="Horizontal">
-                                        <Image Source="Assets/create.png" Width="16" Height="16" Margin="0,0,5,0"/>
-                                        <TextBlock Text="Створити файл"/>
-                                    </StackPanel>
-                                </MenuItem.Header>
-                            </MenuItem>
+                                <MenuItem x:Name="copyItem" Click="Copy_Click" Background="#39496A" BorderBrush="#39496A">
+                                    <MenuItem.Header>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Image Source="Assets/copy.png" Width="16" Height="16" Margin="0,0,5,0"/>
+                                            <TextBlock Text="Копіювати"/>
+                                        </StackPanel>
+                                    </MenuItem.Header>
+                                </MenuItem>
 
-                            <MenuItem x:Name="copyItem" Click="Copy_Click" Background="#39496A" BorderBrush="#39496A">
-                                <MenuItem.Header>
-                                    <StackPanel Orientation="Horizontal">
-                                        <Image Source="Assets/copy.png" Width="16" Height="16" Margin="0,0,5,0"/>
-                                        <TextBlock Text="Копіювати"/>
-                                    </StackPanel>
-                                </MenuItem.Header>
-                            </MenuItem>
+                                <MenuItem x:Name="pasteItem" Click="Paste_Click" IsEnabled="False" Background="#39496A" BorderBrush="#39496A">
+                                    <MenuItem.Header>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Image Source="Assets/paste.png" Width="16" Height="16" Margin="0,0,5,0"/>
+                                            <TextBlock Text="Вставити"/>
+                                        </StackPanel>
+                                    </MenuItem.Header>
+                                </MenuItem>
 
-                            <MenuItem x:Name="pasteItem" Click="Paste_Click" IsEnabled="False" Background="#39496A" BorderBrush="#39496A">
-                                <MenuItem.Header>
-                                    <StackPanel Orientation="Horizontal">
-                                        <Image Source="Assets/paste.png" Width="16" Height="16" Margin="0,0,5,0"/>
-                                        <TextBlock Text="Вставити"/>
-                                    </StackPanel>
-                                </MenuItem.Header>
-                            </MenuItem>
+                                <MenuItem x:Name="updateItem" Click="Update_Click" Background="#39496A" BorderBrush="#39496A">
+                                    <MenuItem.Header>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Image Source="Assets/refresh.png" Width="16" Height="16" Margin="0,0,5,0"/>
+                                            <TextBlock Text="Оновити"/>
+                                        </StackPanel>
+                                    </MenuItem.Header>
+                                </MenuItem>
 
-                            <MenuItem x:Name="updateItem" Click="Update_Click" Background="#39496A" BorderBrush="#39496A">
-                                <MenuItem.Header>
-                                    <StackPanel Orientation="Horizontal">
-                                        <Image Source="Assets/refresh.png" Width="16" Height="16" Margin="0,0,5,0"/>
-                                        <TextBlock Text="Оновити"/>
-                                    </StackPanel>
-                                </MenuItem.Header>
-                            </MenuItem>
+                                <MenuItem x:Name="deleteItem" Click="Delete_Click" Background="#39496A" BorderBrush="#39496A">
+                                    <MenuItem.Header>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Image Source="Assets/delete.png" Width="16" Height="16" Margin="0,0,5,0"/>
+                                            <TextBlock Text="Видалити"/>
+                                        </StackPanel>
+                                    </MenuItem.Header>
+                                </MenuItem>
 
-                            <MenuItem x:Name="deleteItem" Click="Delete_Click" Background="#39496A" BorderBrush="#39496A">
-                                <MenuItem.Header>
-                                    <StackPanel Orientation="Horizontal">
-                                        <Image Source="Assets/delete.png" Width="16" Height="16" Margin="0,0,5,0"/>
-                                        <TextBlock Text="Видалити"/>
-                                    </StackPanel>
-                                </MenuItem.Header>
-                            </MenuItem>
+                                <MenuItem x:Name="renameItem" Click="Rename_Click" Background="#39496A" BorderBrush="#39496A">
+                                    <MenuItem.Header>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Image Source="Assets/rename.png" Width="16" Height="16" Margin="0,0,5,0"/>
+                                            <TextBlock Text="Перейменувати"/>
+                                        </StackPanel>
+                                    </MenuItem.Header>
+                                </MenuItem>
 
-                            <MenuItem x:Name="renameItem" Click="Rename_Click" Background="#39496A" BorderBrush="#39496A">
-                                <MenuItem.Header>
-                                    <StackPanel Orientation="Horizontal">
-                                        <Image Source="Assets/rename.png" Width="16" Height="16" Margin="0,0,5,0"/>
-                                        <TextBlock Text="Перейменувати"/>
-                                    </StackPanel>
-                                </MenuItem.Header>
-                            </MenuItem>
+                                <MenuItem x:Name="movItem" Click="Mov_Click" Background="#39496A" BorderBrush="#39496A">
+                                    <MenuItem.Header>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Image Source="Assets/rename.png" Width="16" Height="16" Margin="0,0,5,0"/>
+                                            <TextBlock Text="Перемістити"/>
+                                        </StackPanel>
+                                    </MenuItem.Header>
+                                </MenuItem>
+                            </ContextMenu>
+                        </ListBox.ContextMenu>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Name="ItemGrid" MouseDown="ItemGrid_MouseDown">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="30"/>
+                                        <ColumnDefinition Width="360"/>
+                                        <ColumnDefinition Width="150"/>
+                                        <ColumnDefinition Width="80"/>
+                                    </Grid.ColumnDefinitions>
 
-                            <MenuItem x:Name="movItem" Click="Mov_Click" Background="#39496A" BorderBrush="#39496A">
-                                <MenuItem.Header>
-                                    <StackPanel Orientation="Horizontal">
-                                        <Image Source="Assets/rename.png" Width="16" Height="16" Margin="0,0,5,0"/>
-                                        <TextBlock Text="Перемістити"/>
-                                    </StackPanel>
-                                </MenuItem.Header>
-                            </MenuItem>
-                        </ContextMenu>
-                    </ListBox.ContextMenu>
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <Grid Name="ItemGrid" MouseDown="ItemGrid_MouseDown">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="30"/>
-                                    <ColumnDefinition Width="360"/>
-                                    <ColumnDefinition Width="150"/>
-                                    <ColumnDefinition Width="80"/>
-                                </Grid.ColumnDefinitions>
+                                    <Image Grid.Column="0" Width="30" Height="30">
+                                    </Image>
 
-                                <Image Grid.Column="0" Width="30" Height="30">
-                                </Image>
+                                    <TextBlock Grid.Column="1" Name="ObjectName" Text="{Binding Name}"/>
+                                    <TextBlock Grid.Column="2" Name="ObjectDate" Text="{Binding Date}"/>
+                                    <TextBlock Grid.Column="3" Name="ObjectSize"><Run Text="{Binding SizeString, Mode=OneWay}"/></TextBlock>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
 
-                                <TextBlock Grid.Column="1" Name="ObjectName" Text="{Binding Name}"/>
-                                <TextBlock Grid.Column="2" Name="ObjectDate" Text="{Binding Date}"/>
-                                <TextBlock Grid.Column="3" Name="ObjectSize"><Run Text="{Binding SizeString, Mode=OneWay}"/></TextBlock>
-                            </Grid>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
+                    <TextBox Margin="0,48,611,25" TextWrapping="Wrap" Text="TextBox" HorizontalAlignment="Right" Width="3" Background="#39496A" BorderBrush="#39496A"/>
+                    <TextBox HorizontalAlignment="Center" Margin="0,45,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="798" Height="3" Background="#39496A" BorderBrush="#39496A"/>
 
-                <TextBox Margin="0,48,611,25" TextWrapping="Wrap" Text="TextBox" HorizontalAlignment="Right" Width="3" Background="#39496A" BorderBrush="#39496A"/>
-                <TextBox HorizontalAlignment="Center" Margin="0,45,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="798" Height="3" Background="#39496A" BorderBrush="#39496A"/>
+                    <DockPanel Background="#23283B" Height="19" VerticalAlignment="Bottom">
+                        <TextBlock Text="Всього елементів:" Width="108" Padding="5, 0, 0, 0" Foreground="#d4d4d4"/>
+                        <TextBlock Name="FileCountTextBlock" Text="{Binding FileCount}"/>
+                        <TextBlock Text="|" Width="9" TextAlignment="Center" Foreground="#d4d4d4"/>
+                        <TextBlock Text="Загальний розмір:" Width="103" Foreground="#d4d4d4"/>
+                        <TextBlock Name="TotalSizeTextBlock" Text="{Binding TotalSize}" Width="100"/>
+                    </DockPanel>
 
-                <DockPanel Background="#23283B" Height="19" VerticalAlignment="Bottom">
-                    <TextBlock Text="Всього елементів:" Width="108" Padding="5, 0, 0, 0" Foreground="#d4d4d4"/>
-                    <TextBlock Name="FileCountTextBlock" Text="{Binding FileCount}"/>
-                    <TextBlock Text="|" Width="9" TextAlignment="Center" Foreground="#d4d4d4"/>
-                    <TextBlock Text="Загальний розмір:" Width="103" Foreground="#d4d4d4"/>
-                    <TextBlock Name="TotalSizeTextBlock" Text="{Binding TotalSize}" Width="100"/>
-                </DockPanel>
-
-                <Grid Height = "50" VerticalAlignment="Top" Margin="0,320,0,0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="151*"/>
-                        <ColumnDefinition Width="258*"/>
-                    </Grid.ColumnDefinitions>
-                    <Border Background="#39496A" Height="26" CornerRadius="3,0,0,3" Width="6" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="510,0,0,0" Grid.Column="1"/>
-                    <TextBlock Text="DESIGNED BY DIZI" Foreground="Black" FontSize="15" VerticalAlignment="Center" HorizontalAlignment="Left" Grid.Column="1" Height="20" Width="123" Margin="373,0,0,0"/>
+                    <Grid Height = "50" VerticalAlignment="Top" Margin="0,320,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="151*"/>
+                            <ColumnDefinition Width="258*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Background="#39496A" Height="26" CornerRadius="3,0,0,3" Width="6" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="510,0,0,0" Grid.Column="1"/>
+                        <TextBlock Text="DESIGNED BY DIZI" Foreground="Black" FontSize="15" VerticalAlignment="Center" HorizontalAlignment="Left" Grid.Column="1" Height="20" Width="123" Margin="373,0,0,0"/>
+                    </Grid>
                 </Grid>
             </Grid>
-        </Grid>
-    </Border>
+        </Border>
+    </Grid>
 </Window>
