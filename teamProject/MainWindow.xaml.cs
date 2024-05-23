@@ -672,19 +672,20 @@ namespace teamProject
         private void MyFolder_MouseDown(object sender, MouseButtonEventArgs e)
         {
             DDirectory selectedDir = (DDirectory)FolderListBox.SelectedItem;
-            
+
             if (e.ClickCount >= 2 && model.Path != selectedDir.Path)
             {
                 if (selectedDir.Path == "<=Discs=>")
                 {
+                    Directory.SetCurrentDirectory(selectedDir.Path);
+                    openedDirectory =  Directory.GetCurrentDirectory();
                     UpdateDrives();
                 }
                 else
                 {
                     model.Path = selectedDir.Path;
-                    Directory.SetCurrentDirectory(model.Path);
+                    Directory.SetCurrentDirectory(selectedDir.Path);
                     openedDirectory = Directory.GetCurrentDirectory();
-
                     UpdateItems();
                 }
             }
@@ -722,6 +723,7 @@ namespace teamProject
 
         private void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
+
         }
     }
 
