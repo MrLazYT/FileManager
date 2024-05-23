@@ -472,6 +472,7 @@ namespace teamProject
                         if (isMove)
                         {
                             File.Delete(fileToPaste);
+                            isMove = false;
                         }
                     }
                     else if (Directory.Exists(fileToPaste))
@@ -492,6 +493,7 @@ namespace teamProject
                             if (isMove)
                             {
                                 Directory.Delete(fileToPaste, true);
+                                isMove = false;
                             }
                         }
                     }
@@ -504,8 +506,6 @@ namespace teamProject
                 MessageBox.Show($"Помилка вставки файлу: {ex.Message}", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-        
-
         private string GetUniqueFileName(string fileName)
         {
             string directoryPath = Directory.GetCurrentDirectory();
