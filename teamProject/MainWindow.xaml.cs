@@ -657,6 +657,8 @@ namespace teamProject
                 else
                 {
                     model.Path = selectedDir.Path;
+                    Directory.SetCurrentDirectory(model.Path);
+                    openedDirectory = Directory.GetCurrentDirectory();
 
                     UpdateItems();
                 }
