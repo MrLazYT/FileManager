@@ -178,6 +178,29 @@ namespace teamProject
             });
         }
 
+
+
+
+
+
+
+
+
+
+
+
+        //uvhurbgubhubrhubhubhubhu5b
+
+
+
+
+
+        //))))))))))))))))
+
+
+
+        // GOOD LUCK!!!!!!!!!!!!!!
+
         private Task UpdateItemByTypeAsync(string itemPath)
         {
             return Task.Run(async () =>
@@ -766,8 +789,24 @@ namespace teamProject
 
         private void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-
+            
+            string phrase = SearchTextBox.Text.Trim();
+            if(phrase!="Пошук")
+            {
+                model.ClearItems();
+                if (string.IsNullOrEmpty(phrase))
+                {
+                    UpdateItems();
+                }
+                else
+                {
+                    SearchDirectories(model.Path, phrase);
+                }
+            }    
+           
         }
+
+        
     }
 
     [AddINotifyPropertyChangedInterface]
