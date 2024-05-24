@@ -4,7 +4,6 @@ using PropertyChanged;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -26,6 +25,7 @@ namespace teamProject
             this.DataContext = model;
             openedDirectory = null!;
             _soursDirectory = null!;
+            homeDirectory = null!;
 
             GetDefaultPath();
             UpdateItems();
@@ -33,7 +33,7 @@ namespace teamProject
 
         private void GetDefaultPath()
         {
-            string username = Environment.UserName;
+            //string username = Environment.UserName;
             model.Path = Directory.GetCurrentDirectory();
             openedDirectory = model.Path;
             homeDirectory = model.Path; ;
@@ -70,7 +70,7 @@ namespace teamProject
             }
         }
 
-        private void ItemGrid_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void ItemGrid_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ClickCount == 2)
             {
@@ -128,7 +128,7 @@ namespace teamProject
             }
         }
 
-        private async void UpdateItems()
+        private void UpdateItems()
         {
             if (model.Path == "Диски")
             {
@@ -136,18 +136,8 @@ namespace teamProject
             }
             else
             {
-                model.ClearItems();
-
-                string[] directories = Directory.GetDirectories(model.Path);
-                string[] files = Directory.GetFiles(model.Path);
-
-                await UpdateItemsByTypeAsync(directories);
-                await UpdateItemsByTypeAsync(files);
-
-                ItemsListBox.ItemsSource = model.Items;
-
-                UpdateItemsSize();
-                UpdateButtonState();
+                UpdateMyFolders();
+                UpdateDirectory();
             }
         }
 
@@ -167,6 +157,43 @@ namespace teamProject
             model.Path = "Диски";
         }
 
+        private void UpdateMyFolders()
+        {
+            bool isInMyFolderPath = false;
+
+            foreach (DDirectory myFolder in model.MyFolders)
+            {
+                if (model.Path == myFolder.Path)
+                {
+                    isInMyFolderPath = true;
+                    FolderListBox.SelectedItem = myFolder;
+
+                    break;
+                }
+            }
+
+            if (!isInMyFolderPath)
+            {
+                FolderListBox.SelectedItem = null;
+            }
+        }
+
+        private async void UpdateDirectory()
+        {
+            model.ClearItems();
+
+            string[] directories = Directory.GetDirectories(model.Path);
+            string[] files = Directory.GetFiles(model.Path);
+
+            await UpdateItemsByTypeAsync(directories);
+            await UpdateItemsByTypeAsync(files);
+
+            ItemsListBox.ItemsSource = model.Items;
+
+            UpdateItemsSize();
+            UpdateButtonState();
+        }
+
         private Task UpdateItemsByTypeAsync(string[] items)
         {
             return Task.Run(async () =>
@@ -177,29 +204,6 @@ namespace teamProject
                 }
             });
         }
-
-
-
-
-
-
-
-
-
-
-
-
-        //uvhurbgubhubrhubhubhubhu5b
-
-
-
-
-
-        //))))))))))))))))
-
-
-
-        // GOOD LUCK!!!!!!!!!!!!!!
 
         private Task UpdateItemByTypeAsync(string itemPath)
         {
@@ -274,6 +278,7 @@ namespace teamProject
 
         private Task<long> GetItemsSizeAsync(string curDirectoryPath, DItem dItem)
         {
+
             return Task.Run(async () =>
             {
                 long size = 0;
@@ -304,6 +309,10 @@ namespace teamProject
                         }
                         catch { }
                     }
+                }
+                else
+                {
+                    size = 0;
                 }
 
                 return size;
@@ -417,7 +426,7 @@ namespace teamProject
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine($"Unable to access {rootPath}: {ex.Message}");
+                    Debug.WriteLine($"Неможливо доступитися до {rootPath}: {ex.Message}");
                 }
             });
 
@@ -484,7 +493,7 @@ namespace teamProject
             pasteItem.IsEnabled = true;
         }
 
-        private void Paste_Click(object sender, RoutedEventArgs e)
+        private async void Paste_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -497,47 +506,18 @@ namespace teamProject
                     
                     if (PathTextBox.Text.Contains(Path.GetFileName(fileToPaste)))
                     {
-                        MessageBox.Show("Не можливо вставити папку саму в себе");
+                        MessageBox.Show("Не можливо вставити папку саму в себе", "Помилка", MessageBoxButton.OK, MessageBoxImage.Warning);
+
                         continue;
                     }
 
                     if (File.Exists(fileToPaste))
                     {
-                        var fileName = Path.GetFileName(fileToPaste);
-                        var destinationPath = Path.Combine(openedDirectory, fileName);
-                        var uniqueFileName = GetUniqueFileName(fileName);
-
-                        File.Copy(fileToPaste, uniqueFileName);
-                        
-                        if (isMove)
-                        {
-                            DeleteFile(fileToPaste);
-                            
-                            isMove = false;
-                        }
+                        await PasteFileAsync(fileToPaste);
                     }
                     else if (Directory.Exists(fileToPaste))
                     {
-                        var sourceeDirectoryName = new DirectoryInfo(fileToPaste).Name;
-                        var destinationPath = Path.Combine(openedDirectory, sourceeDirectoryName);
-                        var uniqueDirectoryName = GetUniqueFileName(sourceeDirectoryName);
-
-                        if (openedDirectory == _soursDirectory)
-                        {
-                            MessageBox.Show("Не можливо вставити кореневу папку в саму ж себе");
-                        }
-                        else
-                        {
-                            Directory.CreateDirectory(uniqueDirectoryName);
-
-                            CopyDirectory(fileToPaste, destinationPath);
-                            
-                            if (isMove)
-                            {
-                                DeleteDirectory(fileToPaste);
-                                isMove = false;
-                            }
-                        }
+                        await PasteDirectoryAsync(fileToPaste);
                     }
                 }
 
@@ -548,6 +528,54 @@ namespace teamProject
                 MessageBox.Show($"Помилка вставки файлу: {ex.Message}", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
+        private Task PasteFileAsync(string filePath)
+        {
+            return Task.Run(async () =>
+            {
+                var fileName = Path.GetFileName(filePath);
+                var destinationPath = Path.Combine(openedDirectory, fileName);
+                var uniqueFileName = GetUniqueFileName(fileName);
+
+                File.Copy(filePath, uniqueFileName);
+
+                if (isMove)
+                {
+                    await DeleteFileAsync(filePath);
+
+                    isMove = false;
+                }
+            });
+        }
+
+        private Task PasteDirectoryAsync(string dirPath)
+        {
+            return Task.Run(async () =>
+            {
+                var sourceDirectoryName = new DirectoryInfo(dirPath).Name;
+                var destinationPath = Path.Combine(openedDirectory, sourceDirectoryName);
+                var uniqueDirectoryName = GetUniqueFileName(sourceDirectoryName);
+
+                if (openedDirectory == _soursDirectory)
+                {
+                    MessageBox.Show("Не можливо вставити папку саму в себе", "Помилка", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+                else
+                {
+                    Directory.CreateDirectory(uniqueDirectoryName);
+
+                    await CopyDirectoryAsync(dirPath, destinationPath);
+
+                    if (isMove)
+                    {
+                        await DeleteDirectoryAsync(dirPath);
+
+                        isMove = false;
+                    }
+                }
+            });
+        }
+
         private string GetUniqueFileName(string fileName)
         {
             string directoryPath = Directory.GetCurrentDirectory();
@@ -569,27 +597,29 @@ namespace teamProject
             return newName;
         }
 
-        private void CopyDirectory(string sourceDirectoryName, string destinationDirectoryName)
+        private Task CopyDirectoryAsync(string sourceDirectoryName, string destinationDirectoryName)
         {
-
-            var directory = new DirectoryInfo(sourceDirectoryName);
-            var dirs = directory.GetDirectories();
-            var files = directory.GetFiles();
-
-            Directory.CreateDirectory(destinationDirectoryName);
-
-            foreach (var file in files)
+            return Task.Run(async () =>
             {
-                var temqPath = Path.Combine(destinationDirectoryName, file.Name);
-                file.CopyTo(temqPath, false);
-            }
+                var directory = new DirectoryInfo(sourceDirectoryName);
+                var dirs = directory.GetDirectories();
+                var files = directory.GetFiles();
 
-            foreach (var subDir in dirs)
-            {
-                var tempPath = Path.Combine(destinationDirectoryName, subDir.Name);
-                
-                CopyDirectory(subDir.FullName, tempPath);
-            }
+                Directory.CreateDirectory(destinationDirectoryName);
+
+                foreach (var file in files)
+                {
+                    var tempPath = Path.Combine(destinationDirectoryName, file.Name);
+                    file.CopyTo(tempPath, false);
+                }
+
+                foreach (var subDir in dirs)
+                {
+                    var tempPath = Path.Combine(destinationDirectoryName, subDir.Name);
+
+                    await CopyDirectoryAsync(subDir.FullName, tempPath);
+                }
+            });
         }
 
         private void Delete_Click(object sender, RoutedEventArgs e)
@@ -606,7 +636,7 @@ namespace teamProject
             }
         }
 
-        private void TryDeleteItems(List<DItem> Items)
+        private async void TryDeleteItems(List<DItem> Items)
         {
             foreach (DItem selectedFile in Items)
             {
@@ -614,51 +644,63 @@ namespace teamProject
 
                 if (File.Exists(itemPath))
                 {
-                    DeleteFile(itemPath);
+                    await DeleteFileAsync(itemPath);
                 }
                 else if (Directory.Exists(itemPath))
                 {
-                    DeleteDirectory(itemPath);
-
-                    string[] files = Directory.GetFiles(itemPath);
-                    string[] directories = Directory.GetDirectories(itemPath);
-
-                    if (files.Length == 0 && directories.Length == 0)
-                    {
-                        DirectoryInfo di = new DirectoryInfo(itemPath);
-                        di.Delete();
-                    }
+                    await DeleteDirectoryAsync(itemPath);
+                    DeleteDirIfEmpty(itemPath);
                 }
 
                 UpdateItems();
             }
         }
 
-        private void DeleteFile(string filePath)
+        private Task DeleteFileAsync(string filePath)
         {
-            FileInfo fi = new FileInfo(filePath);
+            return Task.Run(() =>
+            {
+                FileInfo fi = new FileInfo(filePath);
 
-            fi.IsReadOnly = false;
-            fi.Delete();
+                fi.IsReadOnly = false;
+                fi.Delete();
+            });
         }
 
-        private void DeleteDirectory(string curDirPath)
+        private Task DeleteDirectoryAsync(string curDirPath)
         {
-            string[] files = Directory.GetFiles(curDirPath);
-            string[] directories = Directory.GetDirectories(curDirPath);
+            return Task.Run(async () =>
+            {
+                DeleteDirectoryFiles(curDirPath);
+                
+                string[] directories = Directory.GetDirectories(curDirPath);
+
+                foreach (string dirPath in directories)
+                {
+                    await DeleteDirectoryAsync(dirPath);
+                }
+
+                DeleteDirIfEmpty(curDirPath);
+            });
+        }
+
+        private void DeleteDirectoryFiles(string dirPath)
+        {
+            string[] files = Directory.GetFiles(dirPath);
 
             foreach (string filePath in files)
             {
                 FileInfo fi = new FileInfo(filePath);
-                fi.IsReadOnly = false;
 
+                fi.IsReadOnly = false;
                 fi.Delete();
             }
+        }
 
-            foreach (string dirPath in directories)
+        private void DeleteDirIfEmpty(string dirPath)
+        {
+            if (Directory.Exists(dirPath))
             {
-                DeleteDirectory(dirPath);
-
                 string[] dirFiles = Directory.GetFiles(dirPath);
                 string[] dirDirectories = Directory.GetDirectories(dirPath);
 
@@ -917,12 +959,13 @@ namespace teamProject
         public DItem()
         {
             Name = null!;
+            Date = null!;
         }
 
         public DItem(string name, DateTime date)
         {
             Name = name;
-            Date = date.ToShortDateString();
+            Date = date.ToLongDateString();
         }
 
         public void UpdateItemSize(long size)
@@ -933,17 +976,16 @@ namespace teamProject
 
         public string UpdateSize(long size)
         {
-            long bytes = size;
             string remainderString = "";
             int unitIndex = ConvertUnit(ref size);
-            long roundedBytes = size;
+            long roundedSize = size;
 
             for (int i = 0; i < unitIndex; i++)
             {
-                roundedBytes *= 1024;
+                roundedSize *= 1024;
             }
 
-            long byteDifference = (bytes - roundedBytes);
+            long byteDifference = (Size - roundedSize);
 
             if (byteDifference > 0)
             {
