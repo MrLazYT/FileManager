@@ -139,6 +139,8 @@ namespace teamProject
                 UpdateMyFolders();
                 UpdateDirectory();
             }
+
+            GetTotalItemsCount();
         }
 
         private void UpdateDrives()
@@ -155,6 +157,8 @@ namespace teamProject
             }
 
             model.Path = "Диски";
+
+            GetTotalItemsCount();
         }
 
         private void UpdateMyFolders()
@@ -286,29 +290,7 @@ namespace teamProject
 
                 if (ItemsListBox.Items.Contains(dItem))
                 {
-                    try
-                    {
-                        size = dirInfo.EnumerateFiles("*", SearchOption.AllDirectories).Sum(file => file.Length);
-                    }
-                    catch (UnauthorizedAccessException)
-                    {
-                        try
-                        {
-                            string[] directories = Directory.GetDirectories(curDirectoryPath);
-                            string[] files = Directory.GetFiles(curDirectoryPath);
-
-                            foreach (string directoryPath in directories)
-                            {
-                                size += await GetItemsSize(directoryPath, dItem);
-                            }
-
-                            foreach (string filePath in files)
-                            {
-                                size += new FileInfo(filePath).Length;
-                            }
-                        }
-                        catch { }
-                    }
+                    size = await GetItemsSize(curDirectoryPath, dItem);
                 }
                 else
                 {
@@ -357,6 +339,24 @@ namespace teamProject
 
             BackBtn.IsEnabled = (parentDir != null);
             NextBtn.IsEnabled = model.CanGoForward();
+        }
+
+        private void GetTotalItemsCount()
+        {
+            int totalItems = 0;
+
+            if (model.Path == "Диски")
+            {
+                totalItems = ItemsListBox.Items.Count;
+            }
+            else
+            {
+                string[] directories = Directory.GetDirectories(model.Path);
+                string[] files = Directory.GetFiles(model.Path);
+                totalItems = directories.Count() + files.Count();
+            }
+
+            model.ItemCount = totalItems;
         }
 
         private void OpenFile(DItem dItem)
@@ -800,8 +800,6 @@ namespace teamProject
             {
                 if (selectedDir.Path == "<=Discs=>")
                 {
-                    Directory.SetCurrentDirectory(model.Path);
-                    openedDirectory =  Directory.GetCurrentDirectory();
                     UpdateDrives();
                 }
                 else
@@ -874,6 +872,9 @@ namespace teamProject
         private Stack<string> backPathHistory = new Stack<string>(); 
         public Stack<string> forwardPathHistory = new Stack<string>(); 
         public string Path { get; set; }
+        public int ItemCount { get; set; } = 0;
+        public long TotalSize { get; set; } = 0;
+        public string TotalSizeString { get; set; } = "0 МБ";
         public IEnumerable<DItem> Items => items;
         public IEnumerable<DDirectory> MyFolders => myFolders;
 
