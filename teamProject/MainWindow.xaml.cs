@@ -452,7 +452,7 @@ namespace teamProject
                     string uniqueFileName = GetUniqueFileName(saveFileDialog.FileName);
                     if (saveFileDialog.FilterIndex != 3)
                     {
-                        File.Create(uniqueFileName);
+                        using (File.Create(uniqueFileName)) { }
                     }
                     else
                     {
@@ -716,35 +716,50 @@ namespace teamProject
         {
             try
             {
-                DFile selectedFile = (DFile)ItemsListBox.SelectedItem;
-
-                if (selectedFile == null)
+                if (ItemsListBox.SelectedItem is DFile selectedFile)
                 {
-                    MessageBox.Show("Виберіть файл для перейменування.", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-                }
+                    var oldFilePath = Path.Combine(openedDirectory, selectedFile.Name);
+                    var newFileName = Interaction.InputBox("Введіть нову назву файлу:", "Перейменувати файл", selectedFile.Name);
 
-                var oldFilePath = Path.Combine(openedDirectory, selectedFile.Name);
-                var newFileName = Interaction.InputBox("Введіть нову назву файлу:", "Перейменувати файл", selectedFile.Name);
-
-                if (!string.IsNullOrWhiteSpace(newFileName))
-                {
-                    var newFilePath = Path.Combine(openedDirectory, newFileName);
-
-                    File.Move(oldFilePath, newFilePath);
-                    if (isMove)
+                    if (!string.IsNullOrWhiteSpace(newFileName))
                     {
-                        Delete_Click(sender, e);
+                        var newFilePath = Path.Combine(openedDirectory, newFileName);
+
+                        File.Move(oldFilePath, newFilePath);
+                        UpdateItems();
                     }
-                    UpdateItems();
+                }
+                else if (ItemsListBox.SelectedItem is DDirectory selectedDirectory)
+                {
+                    var oldDirectoryPath = Path.Combine(openedDirectory, selectedDirectory.Name);
+                    var newDirectoryName = Interaction.InputBox("Введіть нову назву папки:", "Перейменувати папку", selectedDirectory.Name);
+
+                    if (!string.IsNullOrWhiteSpace(newDirectoryName))
+                    {
+                        var newDirectoryPath = Path.Combine(openedDirectory, newDirectoryName);
+
+                        if (!Directory.Exists(newDirectoryPath))
+                        {
+                            Directory.Move(oldDirectoryPath, newDirectoryPath);
+                            UpdateItems();
+                        }
+                        else
+                        {
+                            MessageBox.Show("Папка з такою назвою вже існує.", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
+                        }
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Виберіть файл або папку для перейменування.", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Помилка перейменування файлу: {ex.Message}", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Помилка перейменування: {ex.Message}", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-        
+
         private void Mov_Click(object sender, RoutedEventArgs e)
         {
             isMove = true;
