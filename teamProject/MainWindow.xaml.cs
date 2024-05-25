@@ -410,29 +410,6 @@ namespace teamProject
                 }
             }
         }
-         
-        private async void SearchDirectories(string rootPath, string phrase)
-        {
-            List<string> foundItems = new List<string>();
-            
-            await Task.Run(() =>
-            {
-                try
-                {
-                    foundItems.AddRange(Directory
-                        .EnumerateFileSystemEntries(rootPath, "*.*", SearchOption.AllDirectories)
-                        .Where(path => Path.GetFileName(path)
-                        .Contains(phrase, StringComparison.OrdinalIgnoreCase)));
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine($"Неможливо доступитися до {rootPath}: {ex.Message}");
-                }
-            });
-
-            await UpdateItemsByTypeAsync(foundItems.ToArray());
-           
-        }
 
         private void CreateFile_Click(object sender, RoutedEventArgs e)
         {
@@ -846,9 +823,11 @@ namespace teamProject
         {
             
             string phrase = SearchTextBox.Text.Trim();
-            if(phrase!="Пошук")
+
+            if (phrase != "Пошук")
             {
                 model.ClearItems();
+
                 if (string.IsNullOrEmpty(phrase))
                 {
                     UpdateItems();
@@ -857,11 +836,31 @@ namespace teamProject
                 {
                     SearchDirectories(model.Path, phrase);
                 }
-            }    
-           
+            }
         }
 
-        
+        private async void SearchDirectories(string rootPath, string phrase)
+        {
+            List<string> foundItems = new List<string>();
+
+            await Task.Run(() =>
+            {
+                try
+                {
+                    foundItems.AddRange(Directory
+                        .EnumerateFileSystemEntries(rootPath, "*.*", SearchOption.AllDirectories)
+                        .Where(path => Path.GetFileName(path)
+                        .Contains(phrase, StringComparison.OrdinalIgnoreCase)));
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Неможливо доступитися до {rootPath}: {ex.Message}");
+                }
+            });
+
+            await UpdateItemsByTypeAsync(foundItems.ToArray());
+
+        }
     }
 
     [AddINotifyPropertyChangedInterface]
@@ -981,7 +980,7 @@ namespace teamProject
         public DItem(string name, DateTime date)
         {
             Name = name;
-            Date = date.ToLongDateString();
+            Date = DateUK.ConvertDate(date);
         }
 
         public void UpdateItemSize(long size)

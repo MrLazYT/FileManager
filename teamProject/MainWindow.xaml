@@ -65,9 +65,9 @@
             </Setter>
         </Style>
 
-        <!--<Style TargetType="ScrollBar">
+        <Style TargetType="ScrollBar">
             <Setter Property="Background" Value="#39496A"/>
-        </Style>-->
+        </Style>
     </Window.Resources>
     <Grid>
 
@@ -248,9 +248,9 @@
                     <DockPanel Background="#23283B" Height="19" VerticalAlignment="Bottom" LastChildFill="False">
                         <TextBlock Text="Всього елементів:" Width="108" Padding="5, 0, 0, 0" Foreground="#d4d4d4"/>
                         <TextBlock Name="FileCountTextBlock" Text="{Binding ItemCount}" Foreground="#d4d4d4"/>
-                        <!--<TextBlock Text="|" Width="9" TextAlignment="Center" Foreground="#d4d4d4"/>
+                        <TextBlock Text="|" Width="9" TextAlignment="Center" Foreground="#d4d4d4"/>
                         <TextBlock Text="Загальний розмір:" Width="103" Foreground="#d4d4d4"/>
-                        <TextBlock Name="TotalSizeTextBlock" Foreground="#d4d4d4"><Run Text="{Binding TotalSizeString}"/></TextBlock>-->
+                        <TextBlock Name="TotalSizeTextBlock" Foreground="#d4d4d4"><Run Text="{Binding TotalSizeString}"/></TextBlock>
                     </DockPanel>
 
                     <Grid Height = "50" VerticalAlignment="Top" Margin="0,320,0,0">
