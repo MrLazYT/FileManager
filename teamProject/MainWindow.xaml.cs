@@ -4,7 +4,9 @@ using PropertyChanged;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
+using System.Runtime;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -282,53 +284,57 @@ namespace teamProject
 
         private Task<long> GetItemsSizeAsync(string curDirectoryPath, DItem dItem)
         {
-
             return Task.Run(async () =>
             {
                 long size = 0;
+
                 DirectoryInfo dirInfo = new DirectoryInfo(curDirectoryPath);
 
-                if (ItemsListBox.Items.Contains(dItem))
+                if (!ItemsListBox.Items.Contains(dItem))
                 {
-                    size = await GetItemsSize(curDirectoryPath, dItem);
+                    return size;
                 }
-                else
+
+                try
                 {
-                    size = 0;
+                    size = GetItemsSizeFast(curDirectoryPath);
+                }
+                catch
+                {
+                    size = await GetItemsSizeLong(curDirectoryPath, dItem);
                 }
 
                 return size;
             });
         }
 
-        private async Task<long> GetItemsSize(string curDirectoryPath, DItem dItem)
+        private long GetItemsSizeFast(string curDirectoryPath)
+        {
+            DirectoryInfo dirInfo = new DirectoryInfo(curDirectoryPath);
+
+            return dirInfo.EnumerateFiles("*", SearchOption.AllDirectories).Sum(file => file.Length);
+        }
+
+        private async Task<long> GetItemsSizeLong(string curDirectoryPath, DItem dItem)
         {
             long size = 0;
-            DirectoryInfo dirInfo = new DirectoryInfo(curDirectoryPath);
 
             try
             {
-                size = dirInfo.EnumerateFiles("*", SearchOption.AllDirectories).Sum(file => file.Length);
-            }
-            catch (UnauthorizedAccessException)
-            {
-                try
+                string[] directories = Directory.GetDirectories(curDirectoryPath);
+                string[] files = Directory.GetFiles(curDirectoryPath);
+
+                foreach (string directoryPath in directories)
                 {
-                    string[] directories = Directory.GetDirectories(curDirectoryPath);
-                    string[] files = Directory.GetFiles(curDirectoryPath);
-
-                    foreach (string directoryPath in directories)
-                    {
-                        size += await GetItemsSize(directoryPath, dItem);
-                    }
-
-                    foreach (string filePath in files)
-                    {
-                        size += new FileInfo(filePath).Length;
-                    }
+                    size += await GetItemsSizeLong(directoryPath, dItem);
                 }
-                catch { }
+
+                foreach (string filePath in files)
+                {
+                    size += new FileInfo(filePath).Length;
+                }
             }
+            catch { }
 
             return size;
         }
@@ -992,15 +998,16 @@ namespace teamProject
         public string UpdateSize(long size)
         {
             string remainderString = "";
-            int unitIndex = ConvertUnit(ref size);
-            long roundedSize = size;
+            long convertedSize = size;
+            int unitIndex = ConvertUnit(ref convertedSize);
+            long roundedSize = convertedSize;
 
             for (int i = 0; i < unitIndex; i++)
             {
                 roundedSize *= 1024;
             }
 
-            long byteDifference = (Size - roundedSize);
+            long byteDifference = (size - roundedSize);
 
             if (byteDifference > 0)
             {
@@ -1010,7 +1017,7 @@ namespace teamProject
                 remainderString = $",{remainder}";
             }
 
-            return $"{size}{remainderString} {Units[unitIndex]}";
+            return $"{convertedSize}{remainderString} {Units[unitIndex]}";
         }
 
         public int ConvertUnit(ref long unit)
