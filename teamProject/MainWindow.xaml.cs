@@ -867,6 +867,36 @@ namespace teamProject
             await UpdateItemsByTypeAsync(foundItems.ToArray());
 
         }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+        private async void Sort(string rootPath)
+        {
+            List<string> sortedItems = new List<string>();
+            await Task.Run(() =>
+            {
+                try
+                {
+                    sortedItems.AddRange(Directory
+                .EnumerateFileSystemEntries(rootPath, "*.*", SearchOption.AllDirectories)
+                .OrderBy(path => path));
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Неможливо доступитися до {rootPath}: {ex.Message}");
+                }
+            });
+            await UpdateItemsByTypeAsync(sortedItems.ToArray());
+        }
+        //Сортування по алфавіту
+        private void Sort_btn(object sender, RoutedEventArgs e)
+        {
+
+            model.ClearItems();
+            Sort(model.Path);
+        }
     }
 
     [AddINotifyPropertyChangedInterface]
