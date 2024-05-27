@@ -4,9 +4,7 @@ using PropertyChanged;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
-using System.Runtime;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -148,7 +146,7 @@ namespace teamProject
         private void UpdateDrives()
         {
             model.ClearItems();
-            
+
             DriveInfo[] drives = DriveInfo.GetDrives();
 
             foreach (DriveInfo drive in drives)
@@ -188,16 +186,23 @@ namespace teamProject
         {
             model.ClearItems();
 
-            string[] directories = Directory.GetDirectories(model.Path);
-            string[] files = Directory.GetFiles(model.Path);
+            try
+            {
+                string[] directories = Directory.GetDirectories(model.Path);
+                string[] files = Directory.GetFiles(model.Path);
 
-            await UpdateItemsByTypeAsync(directories);
-            await UpdateItemsByTypeAsync(files);
+                await UpdateItemsByTypeAsync(directories);
+                await UpdateItemsByTypeAsync(files);
 
-            ItemsListBox.ItemsSource = model.Items;
+                ItemsListBox.ItemsSource = model.Items;
 
-            UpdateItemsSize();
-            UpdateButtonState();
+                UpdateItemsSize();
+                UpdateButtonState();
+            }
+            catch
+            {
+                MessageBox.Show("Неможливо отримати доступ до папки", "Помилка відкриття папки", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private Task UpdateItemsByTypeAsync(string[] items)
@@ -218,7 +223,7 @@ namespace teamProject
                 string itemName = Path.GetFileName(itemPath);
                 List<string> vanishedItems = new List<string>()
                 { "$recycle.bin", "$windows.~ws", "$winreagent", "config.msi", "documents and settings",
-                  "system volume information", "recovery", "msocache", "$av_asw", "boot",
+                  "system volume information", "recovery", "msocache", "$av_asw", "boot", "application data",
                   "dumpstack.log", "dumpstack.log.tmp", "hiberfil.sys", "pagefile.sys", "swapfile.sys", "vfcompat.dll",
                   "bootmgr", "bootnxt", "boottel.dat", "autoexec.bat", "bootsect.bak", "config.sys", "io.sys",
                   "msdos.sys", "wfnei" };
@@ -229,20 +234,37 @@ namespace teamProject
                 if (Directory.Exists(itemPath) &&
                     !vanishedItems.Contains(itemName.ToLower()))
                 {
-                    dItem = new DDirectory(itemName, itemDate);
-
-                    await GetItemsSizeAsync(itemPath, dItem);
+                    dItem = await UpdateDirectory(itemPath);
                 }
                 else if (File.Exists(itemPath) &&
                          !vanishedItems.Contains(itemName.ToLower()))
                 {
-                    long itemSize = new FileInfo(itemPath).Length;
-
-                    dItem = new DFile(itemName, itemDate, itemSize);
+                    dItem = UpdateFile(itemPath);
                 }
 
                 AddItem(dItem);
             });
+        }
+
+        private Task<DDirectory> UpdateDirectory(string itemPath)
+        {
+            return Task.Run(async () =>
+            {
+                string itemName = Path.GetFileName(itemPath);
+                DateTime itemDate = Directory.GetLastWriteTime($"{itemPath}");
+                DDirectory dDirectory = new DDirectory(itemName, itemDate);
+
+                return dDirectory;
+            });
+        }
+
+        private DFile UpdateFile(string itemPath)
+        {
+            string itemName = Path.GetFileName(itemPath);
+            DateTime itemDate = Directory.GetLastWriteTime($"{itemPath}");
+            long itemSize = new FileInfo(itemPath).Length;
+
+            return new DFile(itemName, itemDate, itemSize);
         }
 
         private void AddItem(DItem dItem)
@@ -277,8 +299,21 @@ namespace teamProject
             if (dItem is DDirectory)
             {
                 string itemPath = Path.Combine(model.Path, dItem.Name);
-                long itemSize = await GetItemsSizeAsync(itemPath, dItem);
-                dItem.UpdateItemSize(itemSize);
+
+                List<string> strings = new List<string>()
+                {
+                    "Users", "ProgramData", "All Users", "Default", "Windows"
+                };
+
+                if (strings.Contains(dItem.Name))
+                {
+                    dItem.SizeString = "Невідомо";
+                }
+                else
+                {
+                    long itemSize = await GetItemsSizeAsync(itemPath, dItem);
+                    dItem.UpdateItemSize(itemSize);
+                }
             }
         }
 
@@ -318,23 +353,25 @@ namespace teamProject
         private async Task<long> GetItemsSizeLong(string curDirectoryPath, DItem dItem)
         {
             long size = 0;
+            string[] directories = new string[] { };
+            string[] files = new string[] { };
 
             try
             {
-                string[] directories = Directory.GetDirectories(curDirectoryPath);
-                string[] files = Directory.GetFiles(curDirectoryPath);
-
-                foreach (string directoryPath in directories)
-                {
-                    size += await GetItemsSizeLong(directoryPath, dItem);
-                }
-
-                foreach (string filePath in files)
-                {
-                    size += new FileInfo(filePath).Length;
-                }
+                directories = Directory.GetDirectories(curDirectoryPath);
+                files = Directory.GetFiles(curDirectoryPath);
             }
             catch { }
+
+            foreach (string directoryPath in directories)
+            {
+                size += await GetItemsSizeLong(directoryPath, dItem);
+            }
+
+            foreach (string filePath in files)
+            {
+                size += new FileInfo(filePath).Length;
+            }
 
             return size;
         }
@@ -377,18 +414,18 @@ namespace teamProject
 
             process.Start();
         }
-        
+
         private void BackBtn_Click(object sender, RoutedEventArgs e)
         {
             DirectoryInfo parentDir = Directory.GetParent(model.Path)!;
-            
+
             if (parentDir != null)
             {
-                model.PushForwardPath(model.Path); 
+                model.PushForwardPath(model.Path);
                 model.Path = parentDir.FullName;
                 Directory.SetCurrentDirectory(model.Path);
                 openedDirectory = Directory.GetCurrentDirectory();
-                
+
                 UpdateItems();
             }
         }
@@ -404,14 +441,14 @@ namespace teamProject
                     model.Path = nextPath;
                     Directory.SetCurrentDirectory(model.Path);
                     openedDirectory = Directory.GetCurrentDirectory();
-                    
+
                     UpdateItems();
                 }
                 else
                 {
                     model.RemoveForwardPath(nextPath);
                     NextBtn.IsEnabled = false;
-                    
+
                     MessageBox.Show("Цей шлях більше не існує.", "Помилка", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
             }
@@ -486,7 +523,7 @@ namespace teamProject
 
                 foreach (var fileToPaste in fileArray)
                 {
-                    
+
                     if (PathTextBox.Text.Contains(Path.GetFileName(fileToPaste)))
                     {
                         MessageBox.Show("Не можливо вставити папку саму в себе", "Помилка", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -655,7 +692,7 @@ namespace teamProject
             return Task.Run(async () =>
             {
                 DeleteDirectoryFiles(curDirPath);
-                
+
                 string[] directories = Directory.GetDirectories(curDirPath);
 
                 foreach (string dirPath in directories)
@@ -755,14 +792,14 @@ namespace teamProject
             Directory.SetCurrentDirectory(model.Path);
             openedDirectory = Directory.GetCurrentDirectory();
             pasteItem.IsEnabled = false;
-            
+
             UpdateItems();
         }
 
         private void UpDate_btn(object sender, RoutedEventArgs e)
         {
             pasteItem.IsEnabled = false;
-            
+
             UpdateItems();
         }
 
@@ -827,7 +864,7 @@ namespace teamProject
 
         private void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            
+
             string phrase = SearchTextBox.Text.Trim();
 
             if (phrase != "Пошук")
@@ -874,8 +911,8 @@ namespace teamProject
     {
         private ObservableCollection<DItem> items;
         private ObservableCollection<DDirectory> myFolders;
-        private Stack<string> backPathHistory = new Stack<string>(); 
-        public Stack<string> forwardPathHistory = new Stack<string>(); 
+        private Stack<string> backPathHistory = new Stack<string>();
+        public Stack<string> forwardPathHistory = new Stack<string>();
         public string Path { get; set; }
         public int ItemCount { get; set; } = 0;
         public long TotalSize { get; set; } = 0;
@@ -932,7 +969,7 @@ namespace teamProject
         {
             items.Clear();
         }
-        
+
         public void PushBackPath(string path)
         {
             backPathHistory.Push(path);
@@ -953,12 +990,12 @@ namespace teamProject
             return forwardPathHistory.Count > 0 ? forwardPathHistory.Pop() : null!;
         }
 
-        public bool CanGoBack() 
+        public bool CanGoBack()
         {
             return backPathHistory.Count > 0;
         }
 
-        public bool CanGoForward() 
+        public bool CanGoForward()
         {
             return forwardPathHistory.Count > 0;
         }
@@ -1013,7 +1050,7 @@ namespace teamProject
             {
                 ConvertUnit(ref byteDifference);
                 int remainder = (int)((100 / 1024.0) * byteDifference);
-                
+
                 remainderString = $",{remainder}";
             }
 
@@ -1051,7 +1088,7 @@ namespace teamProject
             TotalSpace = driveInfo.TotalSize;
             FreeSpace = driveInfo.AvailableFreeSpace;
             PercentSize = 100 - ((FreeSpace / TotalSpace) * 100);
-            
+
             SizeString = "";
             TotalSpaceString = UpdateSize(TotalSpace);
             FreeSpaceString = UpdateSize(FreeSpace);
@@ -1068,7 +1105,7 @@ namespace teamProject
         {
             Path = null!;
         }
-        
+
         public DDirectory(string name, string path)
         {
             Name = name;
@@ -1078,7 +1115,7 @@ namespace teamProject
 
     [AddINotifyPropertyChangedInterface]
     public class DFile : DItem
-    {   
+    {
         public DFile(string name, DateTime date, long size) : base(name, date)
         {
             UpdateItemSize(size);
