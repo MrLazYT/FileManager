@@ -126,7 +126,7 @@
                         </StackPanel>
                     </Button>
 
-                    <Button Style="{StaticResource RoundedButtonStyle}" HorizontalContentAlignment="Center" Margin="0,10,199,0" FontWeight="Bold" FontSize="16" HorizontalAlignment="Right" Width="21" Height="25" VerticalAlignment="Top" Click="Home_btn" Background="#39496A" BorderBrush="#39496A">
+                    <Button Style="{StaticResource RoundedButtonStyle}" HorizontalContentAlignment="Center" Margin="0,10,199,0" FontWeight="Bold" FontSize="16" HorizontalAlignment="Right" Width="21" Height="25" VerticalAlignment="Top" Click="Sort_btn" Background="#39496A" BorderBrush="#39496A">
                         <StackPanel Orientation="Horizontal">
                             <Image Source="Assets/sort.png" Width="16" Height="16"/>
                         </StackPanel>
