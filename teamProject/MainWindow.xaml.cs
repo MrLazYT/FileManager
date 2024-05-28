@@ -18,6 +18,7 @@ namespace teamProject
         private string _soursDirectory;
         private string homeDirectory;
         private bool isMove = false;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -107,7 +108,7 @@ namespace teamProject
             try
             {
                 model.PushBackPath(model.Path);
-                model.Path = Path.Combine(model.Path, dItem.Name);
+                model.Path = dItem.Path;
                 Directory.SetCurrentDirectory(model.Path);
                 openedDirectory = Directory.GetCurrentDirectory();
                 model.forwardPathHistory.Clear();
@@ -246,13 +247,13 @@ namespace teamProject
             });
         }
 
-        private Task<DDirectory> UpdateDirectory(string itemPath)
+        private Task<DDirectory> UpdateDirectory(string dirPath)
         {
-            return Task.Run(async () =>
+            return Task.Run(() =>
             {
-                string itemName = Path.GetFileName(itemPath);
-                DateTime itemDate = Directory.GetLastWriteTime($"{itemPath}");
-                DDirectory dDirectory = new DDirectory(itemName, itemDate);
+                string dirName = Path.GetFileName(dirPath);
+                DateTime dirDate = Directory.GetLastWriteTime($"{dirPath}");
+                DDirectory dDirectory = new DDirectory(dirName, dirDate, dirPath);
 
                 return dDirectory;
             });
@@ -264,7 +265,7 @@ namespace teamProject
             DateTime itemDate = Directory.GetLastWriteTime($"{itemPath}");
             long itemSize = new FileInfo(itemPath).Length;
 
-            return new DFile(itemName, itemDate, itemSize);
+            return new DFile(itemName, itemDate, itemPath, itemSize);
         }
 
         private void AddItem(DItem dItem)
@@ -404,12 +405,11 @@ namespace teamProject
 
         private void OpenFile(DItem dItem)
         {
-            string filePath = Path.Combine(model.Path, dItem.Name);
             Process process = new Process();
             ProcessStartInfo startInfo = new ProcessStartInfo();
 
             startInfo.UseShellExecute = true;
-            startInfo.FileName = filePath;
+            startInfo.FileName = dItem.Path;
             process.StartInfo = startInfo;
 
             process.Start();
@@ -927,10 +927,10 @@ namespace teamProject
             });
             await UpdateItemsByTypeAsync(sortedItems.ToArray());
         }
+
         //Сортування по алфавіту
         private void Sort_btn(object sender, RoutedEventArgs e)
         {
-
             model.ClearItems();
             Sort(model.Path);
         }
@@ -1040,6 +1040,7 @@ namespace teamProject
         };
 
         public string Name { get; set; }
+        public string Path { get; set; }
         public string Date { get; set; }
         public long Size { get; set; }
         public string SizeString { get; set; } = "Розрахунок...";
@@ -1048,12 +1049,21 @@ namespace teamProject
         {
             Name = null!;
             Date = null!;
+            Path = null!;
         }
 
-        public DItem(string name, DateTime date)
+        public DItem(string name, DateTime date, string path)
         {
-            Name = name;
+            if (name.Length > 50)
+            {
+                Name = $"{name.Substring(0, 51)}...";
+            } else
+            {
+                Name = name;
+            }
+
             Date = DateUK.ConvertDate(date);
+            Path = path;
         }
 
         public void UpdateItemSize(long size)
@@ -1104,7 +1114,6 @@ namespace teamProject
     [AddINotifyPropertyChangedInterface]
     public class DDrive : DItem
     {
-        public string Path { get; set; }
         public long TotalSpace { get; set; }
         public string TotalSpaceString { get; set; } = "";
         public long FreeSpace { get; set; }
@@ -1129,12 +1138,7 @@ namespace teamProject
     [AddINotifyPropertyChangedInterface]
     public class DDirectory : DItem
     {
-        public string Path { get; set; }
-
-        public DDirectory(string name, DateTime date) : base(name, date)
-        {
-            Path = null!;
-        }
+        public DDirectory(string name, DateTime date, string path) : base(name, date, path) { }
 
         public DDirectory(string name, string path)
         {
@@ -1146,8 +1150,9 @@ namespace teamProject
     [AddINotifyPropertyChangedInterface]
     public class DFile : DItem
     {
-        public DFile(string name, DateTime date, long size) : base(name, date)
+        public DFile(string name, DateTime date, string path, long size) : base(name, date, path)
         {
+            Path = path;
             UpdateItemSize(size);
         }
     }
