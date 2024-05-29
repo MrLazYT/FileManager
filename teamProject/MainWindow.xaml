@@ -237,7 +237,8 @@
                                 <Grid Name="ItemGrid" MouseDown="ItemGrid_MouseDown">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="30"/>
-                                        <ColumnDefinition Width="310"/>
+                                        <ColumnDefinition Width="210"/>
+                                        <ColumnDefinition Width="100"/>
                                         <ColumnDefinition Width="150"/>
                                         <ColumnDefinition Width="80"/>
                                     </Grid.ColumnDefinitions>
@@ -245,9 +246,10 @@
                                     <Image Grid.Column="0" Width="30" Height="30">
                                     </Image>
 
-                                    <TextBlock Grid.Column="1" Name="ObjectName" Text="{Binding Name}"/>
-                                    <TextBlock Grid.Column="2" Name="ObjectDate" Text="{Binding Date}"/>
-                                    <TextBlock Grid.Column="3" Name="ObjectSize"><Run Text="{Binding SizeString, Mode=OneWay}"/></TextBlock>
+                                    <TextBlock Grid.Column="1" Name="ObjectName" Text="{Binding Name}" VerticalAlignment="Center"/>
+                                    <ProgressBar Margin="5" Value="{Binding PercentSize}" Grid.Column="2" Height="15" Width="100" x:Name="ObjectProgress" Visibility="{Binding ProgressVisibility}"/>
+                                    <TextBlock Grid.Column="3" Name="ObjectDate" Text="{Binding Date}" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Column="4" Name="ObjectSize" VerticalAlignment="Center"><Run Text="{Binding SizeString, Mode=OneWay}"/></TextBlock>
                                 </Grid>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
