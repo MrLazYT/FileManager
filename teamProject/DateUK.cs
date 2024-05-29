@@ -11,13 +11,13 @@ namespace teamProject
 
         private static List<string> days = new List<string>
         {
-            "Неділя",
-            "Понеділок",
-            "Вівторок",
-            "Середа",
-            "Четвер",
-            "П'ятниця",
-            "Субота",
+            "Нд",
+            "Пн",
+            "Вт",
+            "Ср",
+            "Чт",
+            "Пт",
+            "Сб",
         };
 
         private static List<string> months = new List<string>()

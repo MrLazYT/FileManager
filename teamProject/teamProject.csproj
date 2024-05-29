@@ -11,19 +11,37 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Assets\adobe.png" />
     <None Remove="Assets\angle-left.png" />
     <None Remove="Assets\angle-right.png" />
+    <None Remove="Assets\archive.png" />
     <None Remove="Assets\close.png" />
+    <None Remove="Assets\computer.png" />
     <None Remove="Assets\copy.png" />
     <None Remove="Assets\create.png" />
     <None Remove="Assets\delete.png" />
+    <None Remove="Assets\dev-file.png" />
+    <None Remove="Assets\document.png" />
+    <None Remove="Assets\download.png" />
     <None Remove="Assets\edit.png" />
+    <None Remove="Assets\exe-file.png" />
+    <None Remove="Assets\file.png" />
+    <None Remove="Assets\folder.png" />
+    <None Remove="Assets\hdd.png" />
     <None Remove="Assets\house-chimney.png" />
+    <None Remove="Assets\java.png" />
+    <None Remove="Assets\js-file.png" />
+    <None Remove="Assets\mc-office.png" />
     <None Remove="Assets\minimize.png" />
+    <None Remove="Assets\music.png" />
     <None Remove="Assets\paste.png" />
+    <None Remove="Assets\picture.png" />
+    <None Remove="Assets\python.png" />
     <None Remove="Assets\refresh.png" />
     <None Remove="Assets\rename.png" />
+    <None Remove="Assets\sett-file.png" />
     <None Remove="Assets\sort.png" />
+    <None Remove="Assets\video.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -31,19 +49,37 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Assets\adobe.png" />
     <Resource Include="Assets\angle-left.png" />
     <Resource Include="Assets\angle-right.png" />
+    <Resource Include="Assets\archive.png" />
     <Resource Include="Assets\close.png" />
+    <Resource Include="Assets\computer.png" />
     <Resource Include="Assets\copy.png" />
     <Resource Include="Assets\create.png" />
     <Resource Include="Assets\delete.png" />
+    <Resource Include="Assets\dev-file.png" />
+    <Resource Include="Assets\document.png" />
+    <Resource Include="Assets\download.png" />
     <Resource Include="Assets\edit.png" />
+    <Resource Include="Assets\exe-file.png" />
+    <Resource Include="Assets\file.png" />
+    <Resource Include="Assets\folder.png" />
+    <Resource Include="Assets\hdd.png" />
     <Resource Include="Assets\house-chimney.png" />
+    <Resource Include="Assets\java.png" />
+    <Resource Include="Assets\js-file.png" />
+    <Resource Include="Assets\mc-office.png" />
     <Resource Include="Assets\minimize.png" />
+    <Resource Include="Assets\music.png" />
     <Resource Include="Assets\paste.png" />
+    <Resource Include="Assets\picture.png" />
+    <Resource Include="Assets\python.png" />
     <Resource Include="Assets\refresh.png" />
     <Resource Include="Assets\rename.png" />
+    <Resource Include="Assets\sett-file.png" />
     <Resource Include="Assets\sort.png" />
+    <Resource Include="Assets\video.png" />
   </ItemGroup>
 
   <ItemGroup>

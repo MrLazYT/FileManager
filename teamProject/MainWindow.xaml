@@ -65,9 +65,9 @@
             </Setter>
         </Style>
 
-        <Style TargetType="ScrollBar">
+        <!--<Style TargetType="ScrollBar">
             <Setter Property="Background" Value="#39496A"/>
-        </Style>
+        </Style>-->
     </Window.Resources>
     <Grid>
 
@@ -126,7 +126,7 @@
                         </StackPanel>
                     </Button>
 
-                    <Button Style="{StaticResource RoundedButtonStyle}" HorizontalContentAlignment="Center" Margin="0,10,199,0" FontWeight="Bold" FontSize="16" HorizontalAlignment="Right" Width="21" Height="25" VerticalAlignment="Top" Click="Home_btn" Background="#39496A" BorderBrush="#39496A">
+                    <Button Style="{StaticResource RoundedButtonStyle}" HorizontalContentAlignment="Center" Margin="0,10,199,0" FontWeight="Bold" FontSize="16" HorizontalAlignment="Right" Width="21" Height="25" VerticalAlignment="Top" Click="Sort_btn" Background="#39496A" BorderBrush="#39496A">
                         <StackPanel Orientation="Horizontal">
                             <Image Source="Assets/sort.png" Width="16" Height="16"/>
                         </StackPanel>
@@ -145,16 +145,15 @@
                                         <ColumnDefinition Width="105"/>
                                     </Grid.ColumnDefinitions>
 
-                                    <Image Grid.Column="0" Width="30" Height="30">
-                                    </Image>
+                                    <Image Grid.Column="0" Width="24" Height="30" Source="{Binding IconPath}" VerticalAlignment="Center"/>
 
-                                    <TextBlock Grid.Column="1" Name="FolderName" Text="{Binding Name}" Foreground="#d4d4d4"/>
+                                    <TextBlock Grid.Column="1" Name="FolderName" Text="{Binding Name}" Foreground="#d4d4d4" Margin="5,0,0,0" VerticalAlignment="Center"/>
                                 </Grid>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
 
-                    <ListBox Name="ItemsListBox" ItemsSource="{Binding Items}" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="0,58,10,25" HorizontalAlignment="Right" Width="596" Background="#23283B" Foreground="#d4d4d4" BorderBrush="#23283B">
+                    <ListBox Name="ItemsListBox" ItemsSource="{Binding Items}" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="0,58,10,25" HorizontalAlignment="Right" Width="596" Background="#23283B" Foreground="#d4d4d4" BorderBrush="#23283B" SelectionChanged="ItemsListBox_SelectionChanged">
                         <ListBox.ContextMenu>
                             <ContextMenu Background="#39496A" BorderBrush="#39496A" Foreground="#d4d4d4">
                                 <MenuItem x:Name="createItem" Click="CreateFile_Click" Background="#39496A" BorderBrush="#39496A">
@@ -231,12 +230,13 @@
                                         <ColumnDefinition Width="80"/>
                                     </Grid.ColumnDefinitions>
 
-                                    <Image Grid.Column="0" Width="30" Height="30">
-                                    </Image>
+                                    <Image Grid.Column="0" Width="24" Height="30" VerticalAlignment="Center" Source="{Binding IconPath}"/>
 
-                                    <TextBlock Grid.Column="1" Name="ObjectName" Text="{Binding Name}"/>
-                                    <TextBlock Grid.Column="2" Name="ObjectDate" Text="{Binding Date}"/>
-                                    <TextBlock Grid.Column="3" Name="ObjectSize"><Run Text="{Binding SizeString, Mode=OneWay}"/></TextBlock>
+                                    <TextBlock Grid.Column="1" Name="ObjectName" Text="{Binding Name}" Margin="5,0,0,0" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Column="2" Name="ObjectDate" Text="{Binding Date}" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Column="3" Name="ObjectSize" VerticalAlignment="Center">
+                                        <Run Text="{Binding SizeString, Mode=OneWay}"/>
+                                    </TextBlock>
                                 </Grid>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
@@ -253,7 +253,7 @@
                         <TextBlock Name="TotalSizeTextBlock" Foreground="#d4d4d4"><Run Text="{Binding TotalSizeString}"/></TextBlock>
                     </DockPanel>
 
-                    <Grid Height = "50" VerticalAlignment="Top" Margin="0,320,0,0">
+                    <Grid Height = "50" VerticalAlignment="Top" Margin="0,381,0,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="151*"/>
                             <ColumnDefinition Width="258*"/>
