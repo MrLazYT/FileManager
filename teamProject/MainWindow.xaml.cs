@@ -965,7 +965,7 @@ namespace teamProject
                             else
                             {
                                 var itemSize = new FileInfo(path).Length;
-                                return new DFile(itemName, itemDate, path, itemSize) as DItem;
+                                return new DFile(itemName, itemDate, itemSize, path) as DItem;
                             }
                         })
                         .OrderBy(item => item.Date);
@@ -1007,7 +1007,7 @@ namespace teamProject
                             else
                             {
                                 var itemSize = new FileInfo(path).Length;
-                                return new DFile(itemName, itemDate, path, itemSize) as DItem;
+                                return new DFile(itemName, itemDate, itemSize, path) as DItem;
                             }
                         })
                         .OrderByDescending(item => item.Date);
@@ -1048,7 +1048,7 @@ namespace teamProject
                             else
                             {
                                 var itemSize = new FileInfo(path).Length;
-                                return new DFile(itemName, itemDate, path, itemSize) as DItem;
+                                return new DFile(itemName, itemDate, itemSize, path) as DItem;
                             }
                         })
                         .OrderBy(item => item.Size);
@@ -1090,7 +1090,7 @@ namespace teamProject
                             else
                             {
                                 var itemSize = new FileInfo(path).Length;
-                                return new DFile(itemName, itemDate, path, itemSize) as DItem;
+                                return new DFile(itemName, itemDate, itemSize, path) as DItem;
                             }
                         })
                         .OrderByDescending(item => item.Size);
@@ -1137,9 +1137,6 @@ namespace teamProject
         }
 
         private void SortByDate(object sender, RoutedEventArgs e)
-        {
-        //Сортування по алфавіту
-        private void Sort_btn(object sender, RoutedEventArgs e)
         {
             model.ClearItems();
             SortDate(model.Path);
@@ -1282,6 +1279,7 @@ namespace teamProject
         {
             Name = null!;
             Date = null!;
+            Path = null!;
             ProgressVisibility = Visibility.Collapsed;
         }
 
