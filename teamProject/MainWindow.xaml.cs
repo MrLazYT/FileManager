@@ -21,6 +21,8 @@ namespace teamProject
         private string _soursDirectory;
         private string homeDirectory;
         private bool isMove = false;
+        List<CancellationTokenSource> tokens;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -29,6 +31,7 @@ namespace teamProject
             openedDirectory = null!;
             _soursDirectory = null!;
             homeDirectory = null!;
+            tokens = new List<CancellationTokenSource>();
 
             GetDefaultPath();
             UpdateItems();
@@ -77,6 +80,11 @@ namespace teamProject
         {
             if (e.ClickCount == 2)
             {
+                foreach (CancellationTokenSource tokenSource in tokens)
+                {
+                    tokenSource.Cancel();
+                }
+
                 DItem dItem = (DItem)ItemsListBox.SelectedItem;
 
                 if (dItem is DDrive)
@@ -142,8 +150,6 @@ namespace teamProject
                 UpdateMyFolders();
                 UpdateDirectory();
             }
-
-            GetTotalItemsCount();
         }
 
         private void UpdateDrives()
@@ -161,7 +167,8 @@ namespace teamProject
 
             model.Path = "Диски";
 
-            GetTotalItemsCount();
+            UpdateTotalItemsCount();
+            UpdateTotalItemsSize();
         }
 
         private void UpdateMyFolders()
@@ -193,13 +200,14 @@ namespace teamProject
             {
                 string[] directories = Directory.GetDirectories(model.Path);
                 string[] files = Directory.GetFiles(model.Path);
-
+                
                 await UpdateItemsByTypeAsync(directories);
                 await UpdateItemsByTypeAsync(files);
 
                 ItemsListBox.ItemsSource = model.Items;
-
                 UpdateItemsSize();
+                UpdateTotalItemsCount();
+                UpdateTotalItemsSize();
                 UpdateButtonState();
             }
             catch
@@ -249,13 +257,13 @@ namespace teamProject
             });
         }
 
-        private Task<DDirectory> UpdateDirectory(string itemPath)
+        private Task<DDirectory> UpdateDirectory(string dirPath)
         {
             return Task.Run(() =>
             {
-                string itemName = Path.GetFileName(itemPath);
-                DateTime itemDate = Directory.GetLastWriteTime($"{itemPath}");
-                DDirectory dDirectory = new DDirectory(itemName, itemDate, itemPath);
+                string dirName = Path.GetFileName(dirPath);
+                DateTime dirDate = Directory.GetLastWriteTime($"{dirPath}");
+                DDirectory dDirectory = new DDirectory(dirName, dirDate, dirPath, "Assets/folder.png");
 
                 return dDirectory;
             });
@@ -266,8 +274,66 @@ namespace teamProject
             string itemName = Path.GetFileName(itemPath);
             DateTime itemDate = Directory.GetLastWriteTime($"{itemPath}");
             long itemSize = new FileInfo(itemPath).Length;
+            string image = "";
+            string extention = itemName.Substring(itemName.LastIndexOf('.'));
+            if (extention == ".txt")
+            {
+                image = "Assets/document.png";
+            }
+            else if (extention == ".json" || extention == ".xml" || extention == ".xaml" || extention == ".cs" || extention == ".cpp" || extention == ".html" || extention == ".css")
+            {
+                image = "Assets/dev-file.png";
+            }
+            else if (extention == ".ini" || extention == ".dll")
+            {
+                image = "Assets/sett-file.png";
+            }
+            else if (extention == ".exe")
+            {
+                image = "Assets/exe-file.png";
+            }
+            else if (extention == ".js")
+            {
+                image = "Assets/js-file.png";
+            }
+            else if (extention == ".java")
+            {
+                image = "Assets/java.png";
+            }
+            else if (extention == ".png" || extention == ".jpg" || extention == ".jpeg")
+            {
+                image = "Assets/picture.png";
+            }
+            else if (extention == ".mp3" || extention == ".wav" || extention == ".ogg")
+            {
+                image = "Assets/music.png";
+            }
+            else if (extention == ".mp4" || extention == ".mkv" || extention == ".mpeg" || extention == ".avi")
+            {
+                image = "Assets/video.png";
+            }
+            else if (extention == ".zip" || extention == ".rar" || extention == ".7z")
+            {
+                image = "Assets/archive.png";
+            }
+            else if (extention == ".py")
+            {
+                image = "Assets/python.png";
+            }
+            else if (extention == ".doc" || extention == ".docx" || extention == ".docm" || extention == ".ppt" || extention == ".pptx" || extention == ".xls" || extention == ".xlsm" || extention == ".xlsx" || extention == ".accdb")
+            {
+                image = "Assets/mc-office.png";
+            }
+            else if (extention == ".psd" || extention == ".ai" || extention == ".indd" || extention == ".prproj")
+            {
+                image = "Assets/adobe.png";
+            }
+            else
+            {
+                image = "Assets/file.png";
+            }
 
-            return new DFile(itemName, itemDate, itemSize, itemPath);
+            return new DFile(itemName, itemDate, itemPath, itemSize, image);
         }
 
         private void AddItem(DItem dItem)
@@ -302,7 +368,6 @@ namespace teamProject
             if (dItem is DDirectory)
             {
                 string itemPath = Path.Combine(model.Path, dItem.Name);
-
                 List<string> strings = new List<string>()
                 {
                     "Users", "ProgramData", "All Users", "Default", "Windows"
@@ -314,67 +379,101 @@ namespace teamProject
                 }
                 else
                 {
-                    long itemSize = await GetItemsSizeAsync(itemPath, dItem);
+                    CancellationTokenSource tokenSource = new CancellationTokenSource();
+                    tokens.Add(tokenSource);
+
+                    long itemSize = await GetItemsSizeAsync(dItem, tokenSource.Token);
                     dItem.UpdateItemSize(itemSize);
                 }
             }
         }
 
-        private Task<long> GetItemsSizeAsync(string curDirectoryPath, DItem dItem)
+        private Task<long> GetItemsSizeAsync(DItem dItem, CancellationToken token)
         {
+            if (token.IsCancellationRequested)
+            {
+                MessageBox.Show("Canceled");
+                throw new TaskCanceledException();
+            }
+
             return Task.Run(async () =>
             {
-                long size = 0;
-
-                DirectoryInfo dirInfo = new DirectoryInfo(curDirectoryPath);
-
-                if (!ItemsListBox.Items.Contains(dItem))
+                if (token.IsCancellationRequested)
                 {
-                    return size;
+                    MessageBox.Show("Canceled");
+                    return 0;
                 }
+
+                long size = 0;
 
                 try
                 {
-                    size = GetItemsSizeFast(curDirectoryPath);
+                    size = GetItemsSizeFast(dItem);
                 }
                 catch
                 {
-                    size = await GetItemsSizeLong(curDirectoryPath, dItem);
+                    size = await GetItemsSizeLong(dItem.Path, token);
                 }
 
                 return size;
             });
         }
 
-        private long GetItemsSizeFast(string curDirectoryPath)
+        private long GetItemsSizeFast(DItem dItem)
         {
-            DirectoryInfo dirInfo = new DirectoryInfo(curDirectoryPath);
+            DirectoryInfo dirInfo = new DirectoryInfo(dItem.Path);
+            long size = dirInfo.EnumerateFiles("*", SearchOption.AllDirectories).Sum(file => file.Length);
 
-            return dirInfo.EnumerateFiles("*", SearchOption.AllDirectories).Sum(file => file.Length);
+            UpdateDirectorySize(size);
+
+            return size;
         }
 
-        private async Task<long> GetItemsSizeLong(string curDirectoryPath, DItem dItem)
+        private async Task<long> GetItemsSizeLong(string curDirectoryPath, CancellationToken token)
         {
             long size = 0;
             string[] directories = new string[] { };
             string[] files = new string[] { };
+
+            if (token.IsCancellationRequested)
+            {
+                MessageBox.Show("Canceled");
+                return 0;
+            }
 
             try
             {
                 directories = Directory.GetDirectories(curDirectoryPath);
                 files = Directory.GetFiles(curDirectoryPath);
             }
-            catch { }
+            catch
+            {
+                return 0;
+            }
 
             foreach (string directoryPath in directories)
             {
-                size += await GetItemsSizeLong(directoryPath, dItem);
+                size += await GetItemsSizeLong(directoryPath, token);
+
+                if (token.IsCancellationRequested)
+                {
+                    MessageBox.Show("Canceled");
+                    return 0;
+                }
             }
 
             foreach (string filePath in files)
             {
+                if (token.IsCancellationRequested)
+                {
+                    MessageBox.Show("Canceled");
+                    return 0;
+                }
+
                 size += new FileInfo(filePath).Length;
             }
+
+            UpdateDirectorySize(size);
 
             return size;
         }
@@ -387,22 +486,35 @@ namespace teamProject
             NextBtn.IsEnabled = model.CanGoForward();
         }
 
-        private void GetTotalItemsCount()
+        private void UpdateTotalItemsCount()
         {
-            int totalItems = 0;
+            model.ItemCount = ItemsListBox.Items.Count;
+        }
 
-            if (model.Path == "Диски")
+        private void UpdateTotalItemsSize()
+        {
+            long totalSize = 0;
+
+            foreach (DItem dItem in model.Items)
             {
-                totalItems = ItemsListBox.Items.Count;
-            }
-            else
-            {
-                string[] directories = Directory.GetDirectories(model.Path);
-                string[] files = Directory.GetFiles(model.Path);
-                totalItems = directories.Count() + files.Count();
+                if (dItem is DFile)
+                {
+                    totalSize += dItem.Size;
+                }
+                else if (dItem is DDrive)
+                {
+                    DDrive dDrive = (DDrive)dItem;
+
+                    totalSize += dDrive.TotalSpace - dDrive.FreeSpace;
+                }
             }
 
-            model.ItemCount = totalItems;
+            model.UpdateTotalSize(totalSize);
+        }
+
+        private void UpdateDirectorySize(long size)
+        {
+            model.UpdateTotalSize(model.TotalSize + size);
         }
 
         private void OpenFile(DItem dItem)
@@ -838,6 +950,11 @@ namespace teamProject
         {
             if (e.Key == Key.Enter)
             {
+                foreach (CancellationTokenSource tokenSource in tokens)
+                {
+                    tokenSource.Cancel();
+                }
+
                 try
                 {
                     model.Path = PathTextBox.Text;
@@ -907,7 +1024,6 @@ namespace teamProject
 
         }
 
-       
         private async void SortFromAtoZ(string rootPath)
         {
             List<string> sortedItems = new List<string>();
@@ -943,7 +1059,6 @@ namespace teamProject
                 }
             });
             await UpdateItemsByTypeAsync(sortedItems.ToArray());
-
         }
         
         private async void SortDate(string rootPath)
@@ -1158,7 +1273,6 @@ namespace teamProject
             model.ClearItems();
             SortSizeDesc(model.Path);
         }
-
     }
 
     [AddINotifyPropertyChangedInterface]
@@ -1175,6 +1289,11 @@ namespace teamProject
         public IEnumerable<DItem> Items => items;
         public IEnumerable<DDirectory> MyFolders => myFolders;
 
+        private List<string> Units = new List<string>()
+            {
+                "Байт", "КБ", "МБ", "ГБ", "ТБ", "ПТ"
+            };
+
         public Model()
         {
             Path = null!;
@@ -1182,13 +1301,13 @@ namespace teamProject
             items = new ObservableCollection<DItem>();
             myFolders = new ObservableCollection<DDirectory>()
             {
-                new DDirectory("Диски", "<=Discs=>"),
-                new DDirectory("Робочий стіл", Environment.GetFolderPath(Environment.SpecialFolder.Desktop)),
-                new DDirectory("Завантаження", @$"C:\Users\{Environment.UserName}\Downloads"),
-                new DDirectory("Документи", Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)),
-                new DDirectory("Зображення", Environment.GetFolderPath(Environment.SpecialFolder.MyPictures)),
-                new DDirectory("Відео", Environment.GetFolderPath(Environment.SpecialFolder.MyVideos)),
-                new DDirectory("Музика", Environment.GetFolderPath(Environment.SpecialFolder.MyMusic)),
+                new DDirectory("Диски", "<=Discs=>", "Assets/hdd.png"),
+                new DDirectory("Робочий стіл", Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "Assets/computer.png"),
+                new DDirectory("Завантаження", @$"C:\Users\{Environment.UserName}\Downloads", "Assets/download.png"),
+                new DDirectory("Документи", Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Assets/document.png"),
+                new DDirectory("Зображення", Environment.GetFolderPath(Environment.SpecialFolder.MyPictures), "Assets/picture.png"),
+                new DDirectory("Відео", Environment.GetFolderPath(Environment.SpecialFolder.MyVideos), "Assets/video.png"),
+                new DDirectory("Музика", Environment.GetFolderPath(Environment.SpecialFolder.MyMusic), "Assets/music.png"),
             };
         }
 
@@ -1254,6 +1373,50 @@ namespace teamProject
         {
             return forwardPathHistory.Count > 0;
         }
+
+        public void UpdateTotalSize(long size)
+        {
+            TotalSize = size;
+            TotalSizeString = UpdateSize(size);
+        }
+
+        public string UpdateSize(long size)
+        {
+            string remainderString = "";
+            long convertedSize = size;
+            int unitIndex = ConvertUnit(ref convertedSize);
+            long roundedSize = convertedSize;
+
+            for (int i = 0; i < unitIndex; i++)
+            {
+                roundedSize *= 1024;
+            }
+
+            long byteDifference = (size - roundedSize);
+
+            if (byteDifference > 0)
+            {
+                ConvertUnit(ref byteDifference);
+                int remainder = (int)((100 / 1024.0) * byteDifference);
+
+                remainderString = $",{remainder}";
+            }
+
+            return $"{convertedSize}{remainderString} {Units[unitIndex]}";
+        }
+
+        public int ConvertUnit(ref long unit)
+        {
+            int unitIndex = 0;
+
+            while (unit >= 1024)
+            {
+                unit /= 1024;
+                unitIndex++;
+            }
+
+            return unitIndex;
+        }
     }
 
     [AddINotifyPropertyChangedInterface]
@@ -1271,6 +1434,7 @@ namespace teamProject
         public string Date { get; set; }
         public long Size { get; set; }
         public string SizeString { get; set; } = "Розрахунок...";
+        public string IconPath { get; set; }
         public Visibility ProgressVisibility { get; set; }
         public int ProgressSize { get; set; }
         public double PercentSize { get; set; }
@@ -1298,6 +1462,7 @@ namespace teamProject
 
             Date = DateUK.ConvertDate(date);
             Path = path;
+            IconPath = iconPath;
             ProgressVisibility = Visibility.Collapsed;
             ProgressSize = 155;
         }
@@ -1305,7 +1470,7 @@ namespace teamProject
         public void UpdateItemSize(long size)
         {
             Size = size;
-            SizeString = UpdateSize(Size);
+            SizeString = UpdateSize(size);
         }
 
         public string UpdateSize(long size)
@@ -1375,21 +1540,24 @@ namespace teamProject
     [AddINotifyPropertyChangedInterface]
     public class DDirectory : DItem
     {
-        public DDirectory(string name, DateTime date, string path) : base(name, date, path) { }
+        public DDirectory(string name, DateTime date, string path, string iconPath) : base(name, date, path, iconPath) { }
 
-        public DDirectory(string name, string path)
+        public DDirectory(string name, string path, string iconPath)
         {
             Name = name;
             Path = path;
+            IconPath = iconPath;
         }
     }
 
     [AddINotifyPropertyChangedInterface]
     public class DFile : DItem
     {
-        public DFile(string name, DateTime date, long size, string path) : base(name, date, path)
+        public DFile(string name, DateTime date, string path, long size, string iconPath) : base(name, date, path, iconPath)
         {
+            Path = path;
             UpdateItemSize(size);
+            IconPath = iconPath
         }
     }
 }

@@ -64,9 +64,10 @@
                 </Setter.Value>
             </Setter>
         </Style>
-        <Style TargetType="ScrollBar">
+
+        <!--<Style TargetType="ScrollBar">
             <Setter Property="Background" Value="#39496A"/>
-        </Style>
+        </Style>-->
     </Window.Resources>
     <Grid>
 
@@ -155,16 +156,15 @@
                                         <ColumnDefinition Width="105"/>
                                     </Grid.ColumnDefinitions>
 
-                                    <Image Grid.Column="0" Width="30" Height="30">
-                                    </Image>
+                                    <Image Grid.Column="0" Width="24" Height="30" Source="{Binding IconPath}" VerticalAlignment="Center"/>
 
-                                    <TextBlock Grid.Column="1" Name="FolderName" Text="{Binding Name}" Foreground="#d4d4d4"/>
+                                    <TextBlock Grid.Column="1" Name="FolderName" Text="{Binding Name}" Foreground="#d4d4d4" Margin="5,0,0,0" VerticalAlignment="Center"/>
                                 </Grid>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
 
-                    <ListBox Name="ItemsListBox" ItemsSource="{Binding Items}" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="0,58,10,25" HorizontalAlignment="Right" Width="596" Background="#23283B" Foreground="#d4d4d4" BorderBrush="#23283B">
+                    <ListBox Name="ItemsListBox" ItemsSource="{Binding Items}" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="0,58,10,25" HorizontalAlignment="Right" Width="596" Background="#23283B" Foreground="#d4d4d4" BorderBrush="#23283B" SelectionChanged="ItemsListBox_SelectionChanged">
                         <ListBox.ContextMenu>
                             <ContextMenu Background="#39496A" BorderBrush="#39496A" Foreground="#d4d4d4">
                                 <MenuItem x:Name="createItem" Click="CreateFile_Click" Background="#39496A" BorderBrush="#39496A">
@@ -242,8 +242,7 @@
                                         <ColumnDefinition Width="80"/>
                                     </Grid.ColumnDefinitions>
 
-                                    <Image Grid.Column="0" Width="30" Height="30">
-                                    </Image>
+                                    <Image Grid.Column="0" Width="24" Height="30" VerticalAlignment="Center" Source="{Binding IconPath}"/>
 
                                     <TextBlock Grid.Column="1" Name="ObjectName" Text="{Binding Name}" VerticalAlignment="Center"/>
                                     <ProgressBar Margin="5" Background="#39496A" BorderBrush="#465980" Foreground="#51648a" Value="{Binding PercentSize}" Grid.Column="2" Height="15" x:Name="ObjectProgress" Visibility="{Binding ProgressVisibility}">
@@ -269,7 +268,7 @@
                         <TextBlock Name="TotalSizeTextBlock" Foreground="#d4d4d4"><Run Text="{Binding TotalSizeString}"/></TextBlock>
                     </DockPanel>
 
-                    <Grid Height = "50" VerticalAlignment="Top" Margin="0,320,0,0">
+                    <Grid Height = "50" VerticalAlignment="Top" Margin="0,381,0,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="151*"/>
                             <ColumnDefinition Width="258*"/>
