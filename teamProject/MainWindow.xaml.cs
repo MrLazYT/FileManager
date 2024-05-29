@@ -1,4 +1,7 @@
-﻿using Microsoft.VisualBasic;
+﻿// Copyright 2024.
+// This code was written by: Kos Semen, Denys Gladan, Gerych Yurii, Kornijchuk Yurii
+
+using Microsoft.VisualBasic;
 using Microsoft.Win32;
 using PropertyChanged;
 using System.Collections.ObjectModel;
@@ -32,6 +35,7 @@ namespace teamProject
             tokens = new List<CancellationTokenSource>();
 
             GetDefaultPath();
+            model.Path = "Диски";
             UpdateItems();
         }
 
