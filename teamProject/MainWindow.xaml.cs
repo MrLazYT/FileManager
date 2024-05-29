@@ -1264,7 +1264,7 @@ namespace teamProject
             "Байт", "КБ", "МБ", "ГБ", "ТБ", "ПТ"
         };
 
-        private const int MAX_NAME_SIZE = 35;
+        private const int MAX_NAME_SIZE = 25;
 
         public string Name { get; set; }
         public string Path { get; set; }
@@ -1272,6 +1272,7 @@ namespace teamProject
         public long Size { get; set; }
         public string SizeString { get; set; } = "Розрахунок...";
         public Visibility ProgressVisibility { get; set; }
+        public int ProgressSize { get; set; }
         public double PercentSize { get; set; }
         public long UsedSpace { get; set; }
 
@@ -1281,6 +1282,7 @@ namespace teamProject
             Date = null!;
             Path = null!;
             ProgressVisibility = Visibility.Collapsed;
+            ProgressSize = 155;
         }
 
         public DItem(string name, DateTime date, string path)
@@ -1295,8 +1297,9 @@ namespace teamProject
             }
 
             Date = DateUK.ConvertDate(date);
-            ProgressVisibility = Visibility.Collapsed;
             Path = path;
+            ProgressVisibility = Visibility.Collapsed;
+            ProgressSize = 155;
         }
 
         public void UpdateItemSize(long size)
@@ -1362,6 +1365,7 @@ namespace teamProject
             PercentSize = ((double)UsedSpace / TotalSpace) * 100;
             ProgressVisibility = Visibility.Visible;
             SizeString = "";
+            ProgressSize = 115;
             TotalSpaceString = UpdateSize(TotalSpace);
             FreeSpaceString = UpdateSize(FreeSpace);
             Date = $"{FreeSpaceString} вільно з {TotalSpaceString}";
