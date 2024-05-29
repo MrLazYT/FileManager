@@ -8,6 +8,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Shapes;
 
 namespace teamProject
 {
@@ -228,7 +229,7 @@ namespace teamProject
         {
             return Task.Run(async () =>
             {
-                string itemName = Path.GetFileName(itemPath);
+                string itemName = System.IO.Path.GetFileName(itemPath);
                 List<string> vanishedItems = new List<string>()
                 { "$recycle.bin", "$windows.~ws", "$winreagent", "config.msi", "documents and settings",
                   "system volume information", "recovery", "msocache", "$av_asw", "boot", "application data",
@@ -258,7 +259,7 @@ namespace teamProject
         {
             return Task.Run(() =>
             {
-                string dirName = Path.GetFileName(dirPath);
+                string dirName = System.IO.Path.GetFileName(dirPath);
                 DateTime dirDate = Directory.GetLastWriteTime($"{dirPath}");
                 DDirectory dDirectory = new DDirectory(dirName, dirDate, dirPath, "Assets/folder.png");
 
@@ -268,69 +269,10 @@ namespace teamProject
 
         private DFile UpdateFile(string itemPath)
         {
-            string itemName = Path.GetFileName(itemPath);
+            string itemName = System.IO.Path.GetFileName(itemPath);
             DateTime itemDate = Directory.GetLastWriteTime($"{itemPath}");
             long itemSize = new FileInfo(itemPath).Length;
-            string image = "";
-            string extention = itemName.Substring(itemName.LastIndexOf('.'));
-            if (extention == ".txt")
-            {
-                image = "Assets/document.png";
-            }
-            else if (extention == ".json" || extention == ".xml" || extention == ".xaml" || extention == ".cs" || extention == ".cpp" || extention == ".html" || extention == ".css")
-            {
-                image = "Assets/dev-file.png";
-            }
-            else if (extention == ".ini" || extention == ".dll")
-            {
-                image = "Assets/sett-file.png";
-            }
-            else if (extention == ".exe")
-            {
-                image = "Assets/exe-file.png";
-            }
-            else if (extention == ".js")
-            {
-                image = "Assets/js-file.png";
-            }
-            else if (extention == ".java")
-            {
-                image = "Assets/java.png";
-            }
-            else if (extention == ".png" || extention == ".jpg" || extention == ".jpeg")
-            {
-                image = "Assets/picture.png";
-            }
-            else if (extention == ".mp3" || extention == ".wav" || extention == ".ogg")
-            {
-                image = "Assets/music.png";
-            }
-            else if (extention == ".mp4" || extention == ".mkv" || extention == ".mpeg" || extention == ".avi")
-            {
-                image = "Assets/video.png";
-            }
-            else if (extention == ".zip" || extention == ".rar" || extention == ".7z")
-            {
-                image = "Assets/archive.png";
-            }
-            else if (extention == ".py")
-            {
-                image = "Assets/python.png";
-            }
-            else if (extention == ".doc" || extention == ".docx" || extention == ".docm" || extention == ".ppt" || extention == ".pptx" || extention == ".xls" || extention == ".xlsm" || extention == ".xlsx" || extention == ".accdb")
-            {
-                image = "Assets/mc-office.png";
-            }
-            else if (extention == ".psd" || extention == ".ai" || extention == ".indd" || extention == ".prproj")
-            {
-                image = "Assets/adobe.png";
-            }
-            else
-            {
-                image = "Assets/file.png";
-            }
-
-            return new DFile(itemName, itemDate, itemPath, itemSize, image);
+            return new DFile(itemName, itemDate, itemPath, itemSize, GetImageForFile(itemName));
         }
 
         private void AddItem(DItem dItem)
@@ -364,7 +306,7 @@ namespace teamProject
         {
             if (dItem is DDirectory)
             {
-                string itemPath = Path.Combine(model.Path, dItem.Name);
+                string itemPath = System.IO.Path.Combine(model.Path, dItem.Name);
                 List<string> strings = new List<string>()
                 {
                     "Users", "ProgramData", "All Users", "Default", "Windows"
@@ -599,7 +541,7 @@ namespace teamProject
 
                 foreach (DItem selectedFile in selectedFiles)
                 {
-                    filePath = Path.Combine(Directory.GetCurrentDirectory(), selectedFile.Name);
+                    filePath = System.IO.Path.Combine(Directory.GetCurrentDirectory(), selectedFile.Name);
                     fileListForClipboard.Add(filePath);
                 }
 
@@ -625,7 +567,7 @@ namespace teamProject
                 foreach (var fileToPaste in fileArray)
                 {
 
-                    if (PathTextBox.Text.Contains(Path.GetFileName(fileToPaste)))
+                    if (PathTextBox.Text.Contains(System.IO.Path.GetFileName(fileToPaste)))
                     {
                         MessageBox.Show("Не можливо вставити папку саму в себе", "Помилка", MessageBoxButton.OK, MessageBoxImage.Warning);
 
@@ -654,8 +596,8 @@ namespace teamProject
         {
             return Task.Run(async () =>
             {
-                var fileName = Path.GetFileName(filePath);
-                var destinationPath = Path.Combine(openedDirectory, fileName);
+                var fileName = System.IO.Path.GetFileName(filePath);
+                var destinationPath = System.IO.Path.Combine(openedDirectory, fileName);
                 var uniqueFileName = GetUniqueFileName(fileName);
 
                 File.Copy(filePath, uniqueFileName);
@@ -674,7 +616,7 @@ namespace teamProject
             return Task.Run(async () =>
             {
                 var sourceDirectoryName = new DirectoryInfo(dirPath).Name;
-                var destinationPath = Path.Combine(openedDirectory, sourceDirectoryName);
+                var destinationPath = System.IO.Path.Combine(openedDirectory, sourceDirectoryName);
                 var uniqueDirectoryName = GetUniqueFileName(sourceDirectoryName);
 
                 if (openedDirectory == _soursDirectory)
@@ -700,15 +642,15 @@ namespace teamProject
         private string GetUniqueFileName(string fileName)
         {
             string directoryPath = Directory.GetCurrentDirectory();
-            string extension = Path.GetExtension(fileName);
-            string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(fileName);
+            string extension = System.IO.Path.GetExtension(fileName);
+            string fileNameWithoutExtension = System.IO.Path.GetFileNameWithoutExtension(fileName);
             string newName = fileName;
 
-            if (File.Exists(Path.Combine(directoryPath, newName)))
+            if (File.Exists(System.IO.Path.Combine(directoryPath, newName)))
             {
                 int count = 2;
 
-                while (File.Exists(Path.Combine(directoryPath, newName)))
+                while (File.Exists(System.IO.Path.Combine(directoryPath, newName)))
                 {
                     newName = $"{fileNameWithoutExtension}({count}){extension}";
                     count++;
@@ -730,13 +672,13 @@ namespace teamProject
 
                 foreach (var file in files)
                 {
-                    var tempPath = Path.Combine(destinationDirectoryName, file.Name);
+                    var tempPath = System.IO.Path.Combine(destinationDirectoryName, file.Name);
                     file.CopyTo(tempPath, false);
                 }
 
                 foreach (var subDir in dirs)
                 {
-                    var tempPath = Path.Combine(destinationDirectoryName, subDir.Name);
+                    var tempPath = System.IO.Path.Combine(destinationDirectoryName, subDir.Name);
 
                     await CopyDirectoryAsync(subDir.FullName, tempPath);
                 }
@@ -761,7 +703,7 @@ namespace teamProject
         {
             foreach (DItem selectedFile in Items)
             {
-                var itemPath = Path.Combine(openedDirectory, selectedFile.Name);
+                var itemPath = System.IO.Path.Combine(openedDirectory, selectedFile.Name);
 
                 if (File.Exists(itemPath))
                 {
@@ -839,12 +781,12 @@ namespace teamProject
             {
                 if (ItemsListBox.SelectedItem is DFile selectedFile)
                 {
-                    var oldFilePath = Path.Combine(openedDirectory, selectedFile.Name);
+                    var oldFilePath = System.IO.Path.Combine(openedDirectory, selectedFile.Name);
                     var newFileName = Interaction.InputBox("Введіть нову назву файлу:", "Перейменувати файл", selectedFile.Name);
 
                     if (!string.IsNullOrWhiteSpace(newFileName))
                     {
-                        var newFilePath = Path.Combine(openedDirectory, newFileName);
+                        var newFilePath = System.IO.Path.Combine(openedDirectory, newFileName);
 
                         File.Move(oldFilePath, newFilePath);
                         UpdateItems();
@@ -852,12 +794,12 @@ namespace teamProject
                 }
                 else if (ItemsListBox.SelectedItem is DDirectory selectedDirectory)
                 {
-                    var oldDirectoryPath = Path.Combine(openedDirectory, selectedDirectory.Name);
+                    var oldDirectoryPath = System.IO.Path.Combine(openedDirectory, selectedDirectory.Name);
                     var newDirectoryName = Interaction.InputBox("Введіть нову назву папки:", "Перейменувати папку", selectedDirectory.Name);
 
                     if (!string.IsNullOrWhiteSpace(newDirectoryName))
                     {
-                        var newDirectoryPath = Path.Combine(openedDirectory, newDirectoryName);
+                        var newDirectoryPath = System.IO.Path.Combine(openedDirectory, newDirectoryName);
 
                         if (!Directory.Exists(newDirectoryPath))
                         {
@@ -998,7 +940,7 @@ namespace teamProject
                 {
                     foundItems.AddRange(Directory
                         .EnumerateFileSystemEntries(rootPath, "*.*")
-                        .Where(path => Path.GetFileName(path)
+                        .Where(path => System.IO.Path.GetFileName(path)
                         .Contains(phrase, StringComparison.OrdinalIgnoreCase)));
                 }
                 catch (Exception ex)
@@ -1058,7 +1000,7 @@ namespace teamProject
                     var items = Directory.EnumerateFileSystemEntries(rootPath, "*.*")
                         .Select(path =>
                         {
-                            var itemName = Path.GetFileName(path);
+                            var itemName = System.IO.Path.GetFileName(path);
                             var itemDate = Directory.GetLastWriteTime(path);
                             if (Directory.Exists(path))
                             {
@@ -1067,66 +1009,7 @@ namespace teamProject
                             else
                             {
                                 var itemSize = new FileInfo(path).Length;
-                                string image = "";
-                                string extention = itemName.Substring(itemName.LastIndexOf('.'));
-                                if (extention == ".txt")
-                                {
-                                    image = "Assets/document.png";
-                                }
-                                else if (extention == ".json" || extention == ".xml" || extention == ".xaml" || extention == ".cs" || extention == ".cpp" || extention == ".html" || extention == ".css")
-                                {
-                                    image = "Assets/dev-file.png";
-                                }
-                                else if (extention == ".ini" || extention == ".dll")
-                                {
-                                    image = "Assets/sett-file.png";
-                                }
-                                else if (extention == ".exe")
-                                {
-                                    image = "Assets/exe-file.png";
-                                }
-                                else if (extention == ".js")
-                                {
-                                    image = "Assets/js-file.png";
-                                }
-                                else if (extention == ".java")
-                                {
-                                    image = "Assets/java.png";
-                                }
-                                else if (extention == ".png" || extention == ".jpg" || extention == ".jpeg")
-                                {
-                                    image = "Assets/picture.png";
-                                }
-                                else if (extention == ".mp3" || extention == ".wav" || extention == ".ogg")
-                                {
-                                    image = "Assets/music.png";
-                                }
-                                else if (extention == ".mp4" || extention == ".mkv" || extention == ".mpeg" || extention == ".avi")
-                                {
-                                    image = "Assets/video.png";
-                                }
-                                else if (extention == ".zip" || extention == ".rar" || extention == ".7z")
-                                {
-                                    image = "Assets/archive.png";
-                                }
-                                else if (extention == ".py")
-                                {
-                                    image = "Assets/python.png";
-                                }
-                                else if (extention == ".doc" || extention == ".docx" || extention == ".docm" || extention == ".ppt" || extention == ".pptx" || extention == ".xls" || extention == ".xlsm" || extention == ".xlsx" || extention == ".accdb")
-                                {
-                                    image = "Assets/mc-office.png";
-                                }
-                                else if (extention == ".psd" || extention == ".ai" || extention == ".indd" || extention == ".prproj")
-                                {
-                                    image = "Assets/adobe.png";
-                                }
-                                else
-                                {
-                                    image = "Assets/file.png";
-                                }
-
-                                return new DFile(itemName, itemDate, path, itemSize, image) as DItem;
+                                return new DFile(itemName, itemDate, path, itemSize, GetImageForFile(itemName)) as DItem;
                             }
                         })
                         .OrderBy(item => item.Date);
@@ -1159,7 +1042,7 @@ namespace teamProject
                     var items = Directory.EnumerateFileSystemEntries(rootPath, "*.*")
                         .Select(path =>
                         {
-                            var itemName = Path.GetFileName(path);
+                            var itemName = System.IO.Path.GetFileName(path);
                             var itemDate = Directory.GetLastWriteTime(path);
                             if (Directory.Exists(path))
                             {
@@ -1168,66 +1051,7 @@ namespace teamProject
                             else
                             {
                                 var itemSize = new FileInfo(path).Length;
-                                string image = "";
-                                string extention = itemName.Substring(itemName.LastIndexOf('.'));
-                                if (extention == ".txt")
-                                {
-                                    image = "Assets/document.png";
-                                }
-                                else if (extention == ".json" || extention == ".xml" || extention == ".xaml" || extention == ".cs" || extention == ".cpp" || extention == ".html" || extention == ".css")
-                                {
-                                    image = "Assets/dev-file.png";
-                                }
-                                else if (extention == ".ini" || extention == ".dll")
-                                {
-                                    image = "Assets/sett-file.png";
-                                }
-                                else if (extention == ".exe")
-                                {
-                                    image = "Assets/exe-file.png";
-                                }
-                                else if (extention == ".js")
-                                {
-                                    image = "Assets/js-file.png";
-                                }
-                                else if (extention == ".java")
-                                {
-                                    image = "Assets/java.png";
-                                }
-                                else if (extention == ".png" || extention == ".jpg" || extention == ".jpeg")
-                                {
-                                    image = "Assets/picture.png";
-                                }
-                                else if (extention == ".mp3" || extention == ".wav" || extention == ".ogg")
-                                {
-                                    image = "Assets/music.png";
-                                }
-                                else if (extention == ".mp4" || extention == ".mkv" || extention == ".mpeg" || extention == ".avi")
-                                {
-                                    image = "Assets/video.png";
-                                }
-                                else if (extention == ".zip" || extention == ".rar" || extention == ".7z")
-                                {
-                                    image = "Assets/archive.png";
-                                }
-                                else if (extention == ".py")
-                                {
-                                    image = "Assets/python.png";
-                                }
-                                else if (extention == ".doc" || extention == ".docx" || extention == ".docm" || extention == ".ppt" || extention == ".pptx" || extention == ".xls" || extention == ".xlsm" || extention == ".xlsx" || extention == ".accdb")
-                                {
-                                    image = "Assets/mc-office.png";
-                                }
-                                else if (extention == ".psd" || extention == ".ai" || extention == ".indd" || extention == ".prproj")
-                                {
-                                    image = "Assets/adobe.png";
-                                }
-                                else
-                                {
-                                    image = "Assets/file.png";
-                                }
-
-                                return new DFile(itemName, itemDate, path, itemSize, image) as DItem;
+                                return new DFile(itemName, itemDate, path, itemSize, GetImageForFile(itemName)) as DItem;
                             }
                         })
                         .OrderByDescending(item => item.Date);
@@ -1259,7 +1083,7 @@ namespace teamProject
                     var items = Directory.EnumerateFileSystemEntries(rootPath, "*.*")
                         .Select(path =>
                         {
-                            var itemName = Path.GetFileName(path);
+                            var itemName = System.IO.Path.GetFileName(path);
                             var itemDate = Directory.GetLastWriteTime(path);
                             if (Directory.Exists(path))
                             {
@@ -1268,66 +1092,7 @@ namespace teamProject
                             else
                             {
                                 var itemSize = new FileInfo(path).Length;
-                                string image = "";
-                                string extention = itemName.Substring(itemName.LastIndexOf('.'));
-                                if (extention == ".txt")
-                                {
-                                    image = "Assets/document.png";
-                                }
-                                else if (extention == ".json" || extention == ".xml" || extention == ".xaml" || extention == ".cs" || extention == ".cpp" || extention == ".html" || extention == ".css")
-                                {
-                                    image = "Assets/dev-file.png";
-                                }
-                                else if (extention == ".ini" || extention == ".dll")
-                                {
-                                    image = "Assets/sett-file.png";
-                                }
-                                else if (extention == ".exe")
-                                {
-                                    image = "Assets/exe-file.png";
-                                }
-                                else if (extention == ".js")
-                                {
-                                    image = "Assets/js-file.png";
-                                }
-                                else if (extention == ".java")
-                                {
-                                    image = "Assets/java.png";
-                                }
-                                else if (extention == ".png" || extention == ".jpg" || extention == ".jpeg")
-                                {
-                                    image = "Assets/picture.png";
-                                }
-                                else if (extention == ".mp3" || extention == ".wav" || extention == ".ogg")
-                                {
-                                    image = "Assets/music.png";
-                                }
-                                else if (extention == ".mp4" || extention == ".mkv" || extention == ".mpeg" || extention == ".avi")
-                                {
-                                    image = "Assets/video.png";
-                                }
-                                else if (extention == ".zip" || extention == ".rar" || extention == ".7z")
-                                {
-                                    image = "Assets/archive.png";
-                                }
-                                else if (extention == ".py")
-                                {
-                                    image = "Assets/python.png";
-                                }
-                                else if (extention == ".doc" || extention == ".docx" || extention == ".docm" || extention == ".ppt" || extention == ".pptx" || extention == ".xls" || extention == ".xlsm" || extention == ".xlsx" || extention == ".accdb")
-                                {
-                                    image = "Assets/mc-office.png";
-                                }
-                                else if (extention == ".psd" || extention == ".ai" || extention == ".indd" || extention == ".prproj")
-                                {
-                                    image = "Assets/adobe.png";
-                                }
-                                else
-                                {
-                                    image = "Assets/file.png";
-                                }
-
-                                return new DFile(itemName, itemDate, path, itemSize, image) as DItem;
+                                return new DFile(itemName, itemDate, path, itemSize, GetImageForFile(itemName)) as DItem;
                             }
                         })
                         .OrderBy(item => item.Size);
@@ -1360,7 +1125,7 @@ namespace teamProject
                     var items = Directory.EnumerateFileSystemEntries(rootPath, "*.*")
                         .Select(path =>
                         {
-                            var itemName = Path.GetFileName(path);
+                            var itemName = System.IO.Path.GetFileName(path);
                             var itemDate = Directory.GetLastWriteTime(path);
                             if (Directory.Exists(path))
                             {
@@ -1369,66 +1134,7 @@ namespace teamProject
                             else
                             {
                                 var itemSize = new FileInfo(path).Length;
-                                string image = "";
-                                string extention = itemName.Substring(itemName.LastIndexOf('.'));
-                                if (extention == ".txt")
-                                {
-                                    image = "Assets/document.png";
-                                }
-                                else if (extention == ".json" || extention == ".xml" || extention == ".xaml" || extention == ".cs" || extention == ".cpp" || extention == ".html" || extention == ".css")
-                                {
-                                    image = "Assets/dev-file.png";
-                                }
-                                else if (extention == ".ini" || extention == ".dll")
-                                {
-                                    image = "Assets/sett-file.png";
-                                }
-                                else if (extention == ".exe")
-                                {
-                                    image = "Assets/exe-file.png";
-                                }
-                                else if (extention == ".js")
-                                {
-                                    image = "Assets/js-file.png";
-                                }
-                                else if (extention == ".java")
-                                {
-                                    image = "Assets/java.png";
-                                }
-                                else if (extention == ".png" || extention == ".jpg" || extention == ".jpeg")
-                                {
-                                    image = "Assets/picture.png";
-                                }
-                                else if (extention == ".mp3" || extention == ".wav" || extention == ".ogg")
-                                {
-                                    image = "Assets/music.png";
-                                }
-                                else if (extention == ".mp4" || extention == ".mkv" || extention == ".mpeg" || extention == ".avi")
-                                {
-                                    image = "Assets/video.png";
-                                }
-                                else if (extention == ".zip" || extention == ".rar" || extention == ".7z")
-                                {
-                                    image = "Assets/archive.png";
-                                }
-                                else if (extention == ".py")
-                                {
-                                    image = "Assets/python.png";
-                                }
-                                else if (extention == ".doc" || extention == ".docx" || extention == ".docm" || extention == ".ppt" || extention == ".pptx" || extention == ".xls" || extention == ".xlsm" || extention == ".xlsx" || extention == ".accdb")
-                                {
-                                    image = "Assets/mc-office.png";
-                                }
-                                else if (extention == ".psd" || extention == ".ai" || extention == ".indd" || extention == ".prproj")
-                                {
-                                    image = "Assets/adobe.png";
-                                }
-                                else
-                                {
-                                    image = "Assets/file.png";
-                                }
-
-                                return new DFile(itemName, itemDate, path, itemSize, image) as DItem;
+                                return new DFile(itemName, itemDate, path, itemSize, GetImageForFile(itemName)) as DItem;
                             }
                         })
                         .OrderByDescending(item => item.Size);
@@ -1495,6 +1201,70 @@ namespace teamProject
         {
             model.ClearItems();
             SortSizeDesc(model.Path);
+        }
+        public string GetImageForFile(string fileName)
+        {
+            string extension = System.IO.Path.GetExtension(fileName).ToLower();
+            string image = "";
+
+            if (extension == ".txt")
+            {
+                image = "Assets/document.png";
+            }
+            else if (extension == ".json" || extension == ".xml" || extension == ".xaml" || extension == ".cs" || extension == ".cpp" || extension == ".html" || extension == ".css")
+            {
+                image = "Assets/dev-file.png";
+            }
+            else if (extension == ".ini" || extension == ".dll")
+            {
+                image = "Assets/sett-file.png";
+            }
+            else if (extension == ".exe")
+            {
+                image = "Assets/exe-file.png";
+            }
+            else if (extension == ".js")
+            {
+                image = "Assets/js-file.png";
+            }
+            else if (extension == ".java")
+            {
+                image = "Assets/java.png";
+            }
+            else if (extension == ".png" || extension == ".jpg" || extension == ".jpeg")
+            {
+                image = "Assets/picture.png";
+            }
+            else if (extension == ".mp3" || extension == ".wav" || extension == ".ogg")
+            {
+                image = "Assets/music.png";
+            }
+            else if (extension == ".mp4" || extension == ".mkv" || extension == ".mpeg" || extension == ".avi")
+            {
+                image = "Assets/video.png";
+            }
+            else if (extension == ".zip" || extension == ".rar" || extension == ".7z")
+            {
+                image = "Assets/archive.png";
+            }
+            else if (extension == ".py")
+            {
+                image = "Assets/python.png";
+            }
+            else if (extension == ".doc" || extension == ".docx" || extension == ".docm" || extension == ".ppt" || extension == ".pptx" || extension == ".xls" || extension == ".xlsm" || extension == ".xlsx" || extension == ".accdb")
+            {
+                image = "Assets/mc-office.png";
+            }
+            else if (extension == ".psd" || extension == ".ai" || extension == ".indd" || extension == ".prproj")
+            {
+                image = "Assets/adobe.png";
+            }
+            else
+            {
+                image = "Assets/file.png";
+            }
+
+            return image;
         }
     }
 
