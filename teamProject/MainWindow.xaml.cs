@@ -8,6 +8,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -390,17 +391,10 @@ namespace teamProject
 
         private Task<long> GetItemsSizeAsync(DItem dItem, CancellationToken token)
         {
-            if (token.IsCancellationRequested)
-            {
-                MessageBox.Show("Canceled");
-                throw new TaskCanceledException();
-            }
-
             return Task.Run(async () =>
             {
                 if (token.IsCancellationRequested)
                 {
-                    MessageBox.Show("Canceled");
                     return 0;
                 }
 
@@ -437,7 +431,6 @@ namespace teamProject
 
             if (token.IsCancellationRequested)
             {
-                MessageBox.Show("Canceled");
                 return 0;
             }
 
@@ -457,7 +450,6 @@ namespace teamProject
 
                 if (token.IsCancellationRequested)
                 {
-                    MessageBox.Show("Canceled");
                     return 0;
                 }
             }
@@ -466,7 +458,6 @@ namespace teamProject
             {
                 if (token.IsCancellationRequested)
                 {
-                    MessageBox.Show("Canceled");
                     return 0;
                 }
 
@@ -1075,12 +1066,12 @@ namespace teamProject
                             var itemDate = Directory.GetLastWriteTime(path);
                             if (Directory.Exists(path))
                             {
-                                return new DDirectory(itemName, itemDate, path) as DItem;
+                                return new DDirectory(itemName, itemDate, path, "") as DItem;
                             }
                             else
                             {
                                 var itemSize = new FileInfo(path).Length;
-                                return new DFile(itemName, itemDate, itemSize, path) as DItem;
+                                return new DFile(itemName, itemDate, path, itemSize, "") as DItem;
                             }
                         })
                         .OrderBy(item => item.Date);
@@ -1117,12 +1108,12 @@ namespace teamProject
                             var itemDate = Directory.GetLastWriteTime(path);
                             if (Directory.Exists(path))
                             {
-                                return new DDirectory(itemName, itemDate, path) as DItem;
+                                return new DDirectory(itemName, itemDate, path, "") as DItem;
                             }
                             else
                             {
                                 var itemSize = new FileInfo(path).Length;
-                                return new DFile(itemName, itemDate, itemSize, path) as DItem;
+                                return new DFile(itemName, itemDate, path, itemSize, "") as DItem;
                             }
                         })
                         .OrderByDescending(item => item.Date);
@@ -1158,12 +1149,12 @@ namespace teamProject
                             var itemDate = Directory.GetLastWriteTime(path);
                             if (Directory.Exists(path))
                             {
-                                return new DDirectory(itemName, itemDate, path) as DItem;
+                                return new DDirectory(itemName, itemDate, path, "") as DItem;
                             }
                             else
                             {
                                 var itemSize = new FileInfo(path).Length;
-                                return new DFile(itemName, itemDate, itemSize, path) as DItem;
+                                return new DFile(itemName, itemDate, path, itemSize, "") as DItem;
                             }
                         })
                         .OrderBy(item => item.Size);
@@ -1200,12 +1191,12 @@ namespace teamProject
                             var itemDate = Directory.GetLastWriteTime(path);
                             if (Directory.Exists(path))
                             {
-                                return new DDirectory(itemName, itemDate, path) as DItem;
+                                return new DDirectory(itemName, itemDate, path, "") as DItem;
                             }
                             else
                             {
                                 var itemSize = new FileInfo(path).Length;
-                                return new DFile(itemName, itemDate, itemSize, path) as DItem;
+                                return new DFile(itemName, itemDate, path, itemSize, "") as DItem;
                             }
                         })
                         .OrderByDescending(item => item.Size);
@@ -1445,11 +1436,12 @@ namespace teamProject
             Name = null!;
             Date = null!;
             Path = null!;
+            IconPath = null!;
             ProgressVisibility = Visibility.Collapsed;
             ProgressSize = 155;
         }
 
-        public DItem(string name, DateTime date, string path)
+        public DItem(string name, DateTime date, string path, string iconPath)
         {
             if (name.Length >= MAX_NAME_SIZE)
             {
@@ -1534,6 +1526,7 @@ namespace teamProject
             TotalSpaceString = UpdateSize(TotalSpace);
             FreeSpaceString = UpdateSize(FreeSpace);
             Date = $"{FreeSpaceString} вільно з {TotalSpaceString}";
+            IconPath = "Assets/hdd.png";
         }
     }
 
@@ -1557,7 +1550,7 @@ namespace teamProject
         {
             Path = path;
             UpdateItemSize(size);
-            IconPath = iconPath
+            IconPath = iconPath;
         }
     }
 }
