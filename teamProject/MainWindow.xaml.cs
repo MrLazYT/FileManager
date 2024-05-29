@@ -1,14 +1,10 @@
-// Copyright 2024
-
 using Microsoft.VisualBasic;
 using Microsoft.Win32;
 using PropertyChanged;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -1066,12 +1062,71 @@ namespace teamProject
                             var itemDate = Directory.GetLastWriteTime(path);
                             if (Directory.Exists(path))
                             {
-                                return new DDirectory(itemName, itemDate, path, "") as DItem;
+                                return new DDirectory(itemName, itemDate, path, "Assets/folder.png") as DItem;
                             }
                             else
                             {
                                 var itemSize = new FileInfo(path).Length;
-                                return new DFile(itemName, itemDate, path, itemSize, "") as DItem;
+                                string image = "";
+                                string extention = itemName.Substring(itemName.LastIndexOf('.'));
+                                if (extention == ".txt")
+                                {
+                                    image = "Assets/document.png";
+                                }
+                                else if (extention == ".json" || extention == ".xml" || extention == ".xaml" || extention == ".cs" || extention == ".cpp" || extention == ".html" || extention == ".css")
+                                {
+                                    image = "Assets/dev-file.png";
+                                }
+                                else if (extention == ".ini" || extention == ".dll")
+                                {
+                                    image = "Assets/sett-file.png";
+                                }
+                                else if (extention == ".exe")
+                                {
+                                    image = "Assets/exe-file.png";
+                                }
+                                else if (extention == ".js")
+                                {
+                                    image = "Assets/js-file.png";
+                                }
+                                else if (extention == ".java")
+                                {
+                                    image = "Assets/java.png";
+                                }
+                                else if (extention == ".png" || extention == ".jpg" || extention == ".jpeg")
+                                {
+                                    image = "Assets/picture.png";
+                                }
+                                else if (extention == ".mp3" || extention == ".wav" || extention == ".ogg")
+                                {
+                                    image = "Assets/music.png";
+                                }
+                                else if (extention == ".mp4" || extention == ".mkv" || extention == ".mpeg" || extention == ".avi")
+                                {
+                                    image = "Assets/video.png";
+                                }
+                                else if (extention == ".zip" || extention == ".rar" || extention == ".7z")
+                                {
+                                    image = "Assets/archive.png";
+                                }
+                                else if (extention == ".py")
+                                {
+                                    image = "Assets/python.png";
+                                }
+                                else if (extention == ".doc" || extention == ".docx" || extention == ".docm" || extention == ".ppt" || extention == ".pptx" || extention == ".xls" || extention == ".xlsm" || extention == ".xlsx" || extention == ".accdb")
+                                {
+                                    image = "Assets/mc-office.png";
+                                }
+                                else if (extention == ".psd" || extention == ".ai" || extention == ".indd" || extention == ".prproj")
+                                {
+                                    image = "Assets/adobe.png";
+                                }
+                                else
+                                {
+                                    image = "Assets/file.png";
+                                }
+
+                                return new DFile(itemName, itemDate, path, itemSize, image) as DItem;
                             }
                         })
                         .OrderBy(item => item.Date);
@@ -1108,12 +1163,71 @@ namespace teamProject
                             var itemDate = Directory.GetLastWriteTime(path);
                             if (Directory.Exists(path))
                             {
-                                return new DDirectory(itemName, itemDate, path, "") as DItem;
+                                return new DDirectory(itemName, itemDate, path, "Assets/folder.png") as DItem;
                             }
                             else
                             {
                                 var itemSize = new FileInfo(path).Length;
-                                return new DFile(itemName, itemDate, path, itemSize, "") as DItem;
+                                string image = "";
+                                string extention = itemName.Substring(itemName.LastIndexOf('.'));
+                                if (extention == ".txt")
+                                {
+                                    image = "Assets/document.png";
+                                }
+                                else if (extention == ".json" || extention == ".xml" || extention == ".xaml" || extention == ".cs" || extention == ".cpp" || extention == ".html" || extention == ".css")
+                                {
+                                    image = "Assets/dev-file.png";
+                                }
+                                else if (extention == ".ini" || extention == ".dll")
+                                {
+                                    image = "Assets/sett-file.png";
+                                }
+                                else if (extention == ".exe")
+                                {
+                                    image = "Assets/exe-file.png";
+                                }
+                                else if (extention == ".js")
+                                {
+                                    image = "Assets/js-file.png";
+                                }
+                                else if (extention == ".java")
+                                {
+                                    image = "Assets/java.png";
+                                }
+                                else if (extention == ".png" || extention == ".jpg" || extention == ".jpeg")
+                                {
+                                    image = "Assets/picture.png";
+                                }
+                                else if (extention == ".mp3" || extention == ".wav" || extention == ".ogg")
+                                {
+                                    image = "Assets/music.png";
+                                }
+                                else if (extention == ".mp4" || extention == ".mkv" || extention == ".mpeg" || extention == ".avi")
+                                {
+                                    image = "Assets/video.png";
+                                }
+                                else if (extention == ".zip" || extention == ".rar" || extention == ".7z")
+                                {
+                                    image = "Assets/archive.png";
+                                }
+                                else if (extention == ".py")
+                                {
+                                    image = "Assets/python.png";
+                                }
+                                else if (extention == ".doc" || extention == ".docx" || extention == ".docm" || extention == ".ppt" || extention == ".pptx" || extention == ".xls" || extention == ".xlsm" || extention == ".xlsx" || extention == ".accdb")
+                                {
+                                    image = "Assets/mc-office.png";
+                                }
+                                else if (extention == ".psd" || extention == ".ai" || extention == ".indd" || extention == ".prproj")
+                                {
+                                    image = "Assets/adobe.png";
+                                }
+                                else
+                                {
+                                    image = "Assets/file.png";
+                                }
+
+                                return new DFile(itemName, itemDate, path, itemSize, image) as DItem;
                             }
                         })
                         .OrderByDescending(item => item.Date);
@@ -1149,12 +1263,71 @@ namespace teamProject
                             var itemDate = Directory.GetLastWriteTime(path);
                             if (Directory.Exists(path))
                             {
-                                return new DDirectory(itemName, itemDate, path, "") as DItem;
+                                return new DDirectory(itemName, itemDate, path, "Assets/folder.png") as DItem;
                             }
                             else
                             {
                                 var itemSize = new FileInfo(path).Length;
-                                return new DFile(itemName, itemDate, path, itemSize, "") as DItem;
+                                string image = "";
+                                string extention = itemName.Substring(itemName.LastIndexOf('.'));
+                                if (extention == ".txt")
+                                {
+                                    image = "Assets/document.png";
+                                }
+                                else if (extention == ".json" || extention == ".xml" || extention == ".xaml" || extention == ".cs" || extention == ".cpp" || extention == ".html" || extention == ".css")
+                                {
+                                    image = "Assets/dev-file.png";
+                                }
+                                else if (extention == ".ini" || extention == ".dll")
+                                {
+                                    image = "Assets/sett-file.png";
+                                }
+                                else if (extention == ".exe")
+                                {
+                                    image = "Assets/exe-file.png";
+                                }
+                                else if (extention == ".js")
+                                {
+                                    image = "Assets/js-file.png";
+                                }
+                                else if (extention == ".java")
+                                {
+                                    image = "Assets/java.png";
+                                }
+                                else if (extention == ".png" || extention == ".jpg" || extention == ".jpeg")
+                                {
+                                    image = "Assets/picture.png";
+                                }
+                                else if (extention == ".mp3" || extention == ".wav" || extention == ".ogg")
+                                {
+                                    image = "Assets/music.png";
+                                }
+                                else if (extention == ".mp4" || extention == ".mkv" || extention == ".mpeg" || extention == ".avi")
+                                {
+                                    image = "Assets/video.png";
+                                }
+                                else if (extention == ".zip" || extention == ".rar" || extention == ".7z")
+                                {
+                                    image = "Assets/archive.png";
+                                }
+                                else if (extention == ".py")
+                                {
+                                    image = "Assets/python.png";
+                                }
+                                else if (extention == ".doc" || extention == ".docx" || extention == ".docm" || extention == ".ppt" || extention == ".pptx" || extention == ".xls" || extention == ".xlsm" || extention == ".xlsx" || extention == ".accdb")
+                                {
+                                    image = "Assets/mc-office.png";
+                                }
+                                else if (extention == ".psd" || extention == ".ai" || extention == ".indd" || extention == ".prproj")
+                                {
+                                    image = "Assets/adobe.png";
+                                }
+                                else
+                                {
+                                    image = "Assets/file.png";
+                                }
+
+                                return new DFile(itemName, itemDate, path, itemSize, image) as DItem;
                             }
                         })
                         .OrderBy(item => item.Size);
@@ -1191,12 +1364,71 @@ namespace teamProject
                             var itemDate = Directory.GetLastWriteTime(path);
                             if (Directory.Exists(path))
                             {
-                                return new DDirectory(itemName, itemDate, path, "") as DItem;
+                                return new DDirectory(itemName, itemDate, path, "Assets/folder.png") as DItem;
                             }
                             else
                             {
                                 var itemSize = new FileInfo(path).Length;
-                                return new DFile(itemName, itemDate, path, itemSize, "") as DItem;
+                                string image = "";
+                                string extention = itemName.Substring(itemName.LastIndexOf('.'));
+                                if (extention == ".txt")
+                                {
+                                    image = "Assets/document.png";
+                                }
+                                else if (extention == ".json" || extention == ".xml" || extention == ".xaml" || extention == ".cs" || extention == ".cpp" || extention == ".html" || extention == ".css")
+                                {
+                                    image = "Assets/dev-file.png";
+                                }
+                                else if (extention == ".ini" || extention == ".dll")
+                                {
+                                    image = "Assets/sett-file.png";
+                                }
+                                else if (extention == ".exe")
+                                {
+                                    image = "Assets/exe-file.png";
+                                }
+                                else if (extention == ".js")
+                                {
+                                    image = "Assets/js-file.png";
+                                }
+                                else if (extention == ".java")
+                                {
+                                    image = "Assets/java.png";
+                                }
+                                else if (extention == ".png" || extention == ".jpg" || extention == ".jpeg")
+                                {
+                                    image = "Assets/picture.png";
+                                }
+                                else if (extention == ".mp3" || extention == ".wav" || extention == ".ogg")
+                                {
+                                    image = "Assets/music.png";
+                                }
+                                else if (extention == ".mp4" || extention == ".mkv" || extention == ".mpeg" || extention == ".avi")
+                                {
+                                    image = "Assets/video.png";
+                                }
+                                else if (extention == ".zip" || extention == ".rar" || extention == ".7z")
+                                {
+                                    image = "Assets/archive.png";
+                                }
+                                else if (extention == ".py")
+                                {
+                                    image = "Assets/python.png";
+                                }
+                                else if (extention == ".doc" || extention == ".docx" || extention == ".docm" || extention == ".ppt" || extention == ".pptx" || extention == ".xls" || extention == ".xlsm" || extention == ".xlsx" || extention == ".accdb")
+                                {
+                                    image = "Assets/mc-office.png";
+                                }
+                                else if (extention == ".psd" || extention == ".ai" || extention == ".indd" || extention == ".prproj")
+                                {
+                                    image = "Assets/adobe.png";
+                                }
+                                else
+                                {
+                                    image = "Assets/file.png";
+                                }
+
+                                return new DFile(itemName, itemDate, path, itemSize, image) as DItem;
                             }
                         })
                         .OrderByDescending(item => item.Size);
