@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualBasic;
 using Microsoft.Win32;
 using PropertyChanged;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Diagnostics;
@@ -949,7 +950,7 @@ namespace teamProject
                 try
                 {
                     foundItems.AddRange(Directory
-                        .EnumerateFileSystemEntries(rootPath, "*.*", SearchOption.AllDirectories)
+                        .EnumerateFileSystemEntries(rootPath, "*.*")
                         .Where(path => Path.GetFileName(path)
                         .Contains(phrase, StringComparison.OrdinalIgnoreCase)));
                 }
@@ -963,11 +964,8 @@ namespace teamProject
 
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-        private async void Sort(string rootPath)
+       
+        private async void SortFromAtoZ(string rootPath)
         {
             List<string> sortedItems = new List<string>();
             await Task.Run(() =>
@@ -975,7 +973,7 @@ namespace teamProject
                 try
                 {
                     sortedItems.AddRange(Directory
-                .EnumerateFileSystemEntries(rootPath, "*.*", SearchOption.AllDirectories)
+                .EnumerateFileSystemEntries(rootPath, "*.*")
                 .OrderBy(path => path));
                 }
                 catch (Exception ex)
@@ -985,13 +983,238 @@ namespace teamProject
             });
             await UpdateItemsByTypeAsync(sortedItems.ToArray());
         }
+        private async void SortFromZtoA(string rootPath)
+        {
+            List<string> sortedItems = new List<string>();
+            await Task.Run(() =>
+            {
+                try
+                {
+                    sortedItems.AddRange(Directory
+                .EnumerateFileSystemEntries(rootPath, "*.*")
+                .OrderByDescending(path => path));
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Неможливо доступитися до {rootPath}: {ex.Message}");
+                }
+            });
+            await UpdateItemsByTypeAsync(sortedItems.ToArray());
 
-        //Сортування по алфавіту
+        }
+        private async void SortDate(string rootPath)
+        {
+            List<DItem> sortedItems = new List<DItem>();
+            await Task.Run(() =>
+            {
+                try
+                {
+                    var items = Directory.EnumerateFileSystemEntries(rootPath, "*.*")
+                        .Select(path =>
+                        {
+                            var itemName = Path.GetFileName(path);
+                            var itemDate = Directory.GetLastWriteTime(path);
+                            if (Directory.Exists(path))
+                            {
+                                return new DDirectory(itemName, itemDate, path) as DItem;
+                            }
+                            else
+                            {
+                                var itemSize = new FileInfo(path).Length;
+                                return new DFile(itemName, itemDate, path, itemSize) as DItem;
+                            }
+                        })
+                        .OrderBy(item => item.Date);
+
+                     sortedItems.AddRange(items);
+                    Dispatcher.Invoke(() =>
+                    {
+                        model.ClearItems();
+                        foreach (var item in sortedItems)
+                        {
+                            model.AddItem(item);
+                        }
+                    });
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Неможливо доступитися до {rootPath}: {ex.Message}");
+                }
+            });
+
+           
+        }
+        private async void SortDateDesc(string rootPath)
+        {
+            List<DItem> sortedItems = new List<DItem>();
+            await Task.Run(() =>
+            {
+                try
+                {
+                    var items = Directory.EnumerateFileSystemEntries(rootPath, "*.*")
+                        .Select(path =>
+                        {
+                            var itemName = Path.GetFileName(path);
+                            var itemDate = Directory.GetLastWriteTime(path);
+                            if (Directory.Exists(path))
+                            {
+                                return new DDirectory(itemName, itemDate, path) as DItem;
+                            }
+                            else
+                            {
+                                var itemSize = new FileInfo(path).Length;
+                                return new DFile(itemName, itemDate, path, itemSize) as DItem;
+                            }
+                        })
+                        .OrderByDescending(item => item.Date);
+
+                    sortedItems.AddRange(items);
+                    Dispatcher.Invoke(() =>
+                    {
+                        model.ClearItems();
+                        foreach (var item in sortedItems)
+                        {
+                            model.AddItem(item);
+                        }
+                    });
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Неможливо доступитися до {rootPath}: {ex.Message}");
+                }
+            });
+           
+        }
+        private async void SortSize(string rootPath)
+        {
+            List<DItem> sortedItems = new List<DItem>();
+            await Task.Run(() =>
+            {
+                try
+                {
+                    var items = Directory.EnumerateFileSystemEntries(rootPath, "*.*")
+                        .Select(path =>
+                        {
+                            var itemName = Path.GetFileName(path);
+                            var itemDate = Directory.GetLastWriteTime(path);
+                            if (Directory.Exists(path))
+                            {
+                                return new DDirectory(itemName, itemDate, path) as DItem;
+                            }
+                            else
+                            {
+                                var itemSize = new FileInfo(path).Length;
+                                return new DFile(itemName, itemDate, path, itemSize) as DItem;
+                            }
+                        })
+                        .OrderBy(item => item.Size);
+
+                    sortedItems.AddRange(items);
+                    Dispatcher.Invoke(() =>
+                    {
+                        model.ClearItems();
+                        foreach (var item in sortedItems)
+                        {
+                            model.AddItem(item);
+                        }
+                    });
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Неможливо доступитися до {rootPath}: {ex.Message}");
+                }
+            });
+          
+           
+        }
+        private async void SortSizeDesc(string rootPath)
+        {
+            List<DItem> sortedItems = new List<DItem>();
+            await Task.Run(() =>
+            {
+                try
+                {
+                    var items = Directory.EnumerateFileSystemEntries(rootPath, "*.*")
+                        .Select(path =>
+                        {
+                            var itemName = Path.GetFileName(path);
+                            var itemDate = Directory.GetLastWriteTime(path);
+                            if (Directory.Exists(path))
+                            {
+                                return new DDirectory(itemName, itemDate, path) as DItem;
+                            }
+                            else
+                            {
+                                var itemSize = new FileInfo(path).Length;
+                                return new DFile(itemName, itemDate, path, itemSize) as DItem;
+                            }
+                        })
+                        .OrderByDescending(item => item.Size);
+
+                    sortedItems.AddRange(items);
+                    Dispatcher.Invoke(() =>
+                    {
+                        model.ClearItems();
+                        foreach (var item in sortedItems)
+                        {
+                            model.AddItem(item);
+                        }
+                    });
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Неможливо доступитися до {rootPath}: {ex.Message}");
+                }
+            });
+            
+        }
         private void Sort_btn(object sender, RoutedEventArgs e)
         {
-            model.ClearItems();
-            Sort(model.Path);
+            if (SortButton.ContextMenu != null)
+            {
+                SortButton.ContextMenu.PlacementTarget = SortButton;
+                SortButton.ContextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+                SortButton.ContextMenu.IsOpen = true;
+            }
+
+            
         }
+       
+        private void SortFromA(object sender, RoutedEventArgs e)
+        {
+            model.ClearItems();
+            SortFromAtoZ(model.Path);
+        }
+
+        private void SortFromZ(object sender, RoutedEventArgs e)
+        {
+            model.ClearItems();
+            SortFromZtoA(model.Path);
+        }
+
+        private void SortByDate(object sender, RoutedEventArgs e)
+        {
+            model.ClearItems();
+            SortDate(model.Path);
+        }
+
+        private void SortBySize(object sender, RoutedEventArgs e)
+        {
+            model.ClearItems();
+            SortSize(model.Path);
+        }
+
+        private void SortDateRev(object sender, RoutedEventArgs e)
+        {
+            model.ClearItems();
+            SortDateDesc(model.Path);
+        }
+        private void SortSizeRev(object sender, RoutedEventArgs e)
+        {
+            model.ClearItems();
+            SortSizeDesc(model.Path);
+        }
+
     }
 
     [AddINotifyPropertyChangedInterface]

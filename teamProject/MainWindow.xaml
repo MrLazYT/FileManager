@@ -126,11 +126,22 @@
                         </StackPanel>
                     </Button>
 
-                    <Button Style="{StaticResource RoundedButtonStyle}" HorizontalContentAlignment="Center" Margin="0,10,199,0" FontWeight="Bold" FontSize="16" HorizontalAlignment="Right" Width="21" Height="25" VerticalAlignment="Top" Click="Sort_btn" Background="#39496A" BorderBrush="#39496A">
+                    <Button x:Name="SortButton" Style="{StaticResource RoundedButtonStyle}" HorizontalContentAlignment="Center" Margin="0,10,199,0" FontWeight="Bold" FontSize="16" HorizontalAlignment="Right" Width="21" Height="25" VerticalAlignment="Top" Click="Sort_btn" Background="#39496A" BorderBrush="#39496A">
                         <StackPanel Orientation="Horizontal">
                             <Image Source="Assets/sort.png" Width="16" Height="16"/>
                         </StackPanel>
+                        <Button.ContextMenu>
+                            <ContextMenu x:Name="SortButtonContextMenu">
+                                <MenuItem Header="Sort by A-Z" Click="SortFromA"/>
+                                <MenuItem Header="Sort by Z-A" Click="SortFromZ"/>
+                                <MenuItem Header="Sort by date" Click="SortByDate"/>
+                                <MenuItem Header="Sort by date reversed" Click="SortDateRev"/>
+                                <MenuItem Header="Sort by size" Click="SortBySize"/>
+                                <MenuItem Header="Sort by size reversed" Click="SortSizeRev"/>
+                            </ContextMenu>
+                        </Button.ContextMenu>
                     </Button>
+
 
                     <TextBox Name="PathTextBox"  Style="{StaticResource RoundedTextBoxStyle}" Text="{Binding Path}" KeyDown="PathTextBox_KeyDown" Margin="105,10,225,0" TextWrapping="Wrap" Height="25" VerticalAlignment="Top" TextChanged="TextBox_TextChanged" VerticalContentAlignment="Center" Background="#39496A" BorderBrush="#39496A" Foreground="#d4d4d4"/>
                     <TextBox Name="SearchTextBox" Text="Пошук" Style="{StaticResource RoundedTextBoxStyle}" Margin="0,10,10,0" TextWrapping="Wrap" HorizontalAlignment="Right" Width="184" Height="25" VerticalAlignment="Top" VerticalContentAlignment="Center" Padding="25,0,0,0" Background="#39496A" BorderBrush="#39496A" Foreground="#d4d4d4" GotFocus="SearchTextBox_GotFocus" LostFocus="SearchTextBox_LostFocus" TextChanged="SearchTextBox_TextChanged"/>
