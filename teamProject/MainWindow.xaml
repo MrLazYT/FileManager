@@ -131,13 +131,13 @@
                             <Image Source="Assets/sort.png" Width="16" Height="16"/>
                         </StackPanel>
                         <Button.ContextMenu>
-                            <ContextMenu x:Name="SortButtonContextMenu">
-                                <MenuItem Header="Sort by A-Z" Click="SortFromA"/>
-                                <MenuItem Header="Sort by Z-A" Click="SortFromZ"/>
-                                <MenuItem Header="Sort by date" Click="SortByDate"/>
-                                <MenuItem Header="Sort by date reversed" Click="SortDateRev"/>
-                                <MenuItem Header="Sort by size" Click="SortBySize"/>
-                                <MenuItem Header="Sort by size reversed" Click="SortSizeRev"/>
+                            <ContextMenu x:Name="SortButtonContextMenu" Background="#39496A" BorderBrush="#39496A" Foreground="#d4d4d4">
+                                <MenuItem Header="Від А до Я" Click="SortFromA" Background="#39496A" BorderBrush="#39496A"/>
+                                <MenuItem Header="Від Я до А" Click="SortFromZ" Background="#39496A" BorderBrush="#39496A"/>
+                                <MenuItem Header="Спершу новіші" Click="SortByDate" Background="#39496A" BorderBrush="#39496A"/>
+                                <MenuItem Header="Спершу старіші" Click="SortDateRev" Background="#39496A" BorderBrush="#39496A"/>
+                                <MenuItem Header="Спершу менші" Click="SortBySize" Background="#39496A" BorderBrush="#39496A"/>
+                                <MenuItem Header="Спершу старші" Click="SortSizeRev" Background="#39496A" BorderBrush="#39496A"/>
                             </ContextMenu>
                         </Button.ContextMenu>
                     </Button>
